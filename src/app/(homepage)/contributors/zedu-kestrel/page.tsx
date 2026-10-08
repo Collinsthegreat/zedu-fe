@@ -75,7 +75,8 @@ const TeamKestrelPage = () => {
           <span className="font-semibold text-primary-500">
             HNG 15 Internship
           </span>{" "}
-          with diverse backgrounds building and contributing to zedu.
+          with diverse backgrounds and skill sets building and contributing to
+          zedu.
         </p>
       </section>
 

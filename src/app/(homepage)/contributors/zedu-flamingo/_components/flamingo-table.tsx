@@ -34,11 +34,18 @@ export function FlamingoTable({
     <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
       <div className="flex flex-col items-start justify-between gap-4 border-b border-neutral-100 bg-neutral-50/40 p-6 sm:flex-row sm:items-center">
         <h2 className="text-xl font-bold text-neutral-900">
-          Contributors ({contributors.length})
+          Contributors (
+          {query
+            ? `${filtered.length} of ${contributors.length}`
+            : contributors.length}
+          )
         </h2>
 
         <div className="relative w-full sm:w-72">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+          <Search
+            aria-hidden="true"
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400"
+          />
           <input
             type="text"
             value={searchQuery}

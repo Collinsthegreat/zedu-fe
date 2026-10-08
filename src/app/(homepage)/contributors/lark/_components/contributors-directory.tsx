@@ -38,8 +38,11 @@ export function ContributorsDirectory({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-semibold text-neutral-900 sm:text-3xl md:text-4xl">
-            Contributors
+            Our Contributors
           </h1>
+          <p className="text-sm text-neutral-600 sm:text-base">
+            The LARK team members who have contributed to building Zedu.
+          </p>
           <p
             className="text-sm text-neutral-600 sm:text-base"
             aria-live="polite"

@@ -21,9 +21,10 @@ export const ContributorsList = ({
       [
         contributor.name,
         contributor.username,
+        contributor.role,
         contributor.workspaceEmail,
         contributor.gitHubEmail,
-        contributor.role,
+        ...(contributor.hobbies ?? []),
       ].some((field) => field.toLowerCase().includes(query))
     );
   }, [contributors, query]);
@@ -53,12 +54,9 @@ export const ContributorsList = ({
       </div>
 
       {filteredContributors.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredContributors.map((contributor) => (
-            <ContributorCard
-              key={`${contributor.name}-${contributor.username}`}
-              contributor={contributor}
-            />
+            <ContributorCard key={contributor.id} contributor={contributor} />
           ))}
         </div>
       ) : (

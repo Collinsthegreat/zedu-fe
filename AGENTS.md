@@ -83,4 +83,4 @@ There is no unit-test runner. The required gates are format, lint, types and a s
 
 ## Commits and PRs
 
-Conventional Commits, enforced by commitlint on every commit and on the PR title. The PR title becomes the squashed commit on `dev`, so make it describe the change. Fill in every section of the PR template, and add the one-line AI-usage note when AI did significant work.
+Conventional Commits, enforced by commitlint on every commit and on the PR title. The PR title becomes the squashed commit on `dev`, so make it describe the change. Fill in every section of the PR template.

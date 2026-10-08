@@ -1,11 +1,9 @@
 name: PR scans
 
-# Review-org replacement for the semgrep half of Zedu's "Security checks" and the ClamAV half of
-# "Malware scan" (both disabled in zedu-hng). Same commands and flags. A separate workflow from
-# pr-checks.yml so previews (deployed when PR checks finishes) don't wait for the ClamAV update.
-#
-# Untrusted: runs on PR code with a read-only token. Uploads pr-scans-results, which
-# pr-review-comment.yml posts as commit statuses.
+# Caller: the logic lives in zedu-hng/zedu-ci (pr-scans.yml), pinned by commit. This file sets the
+# triggers, concurrency and token permissions. Keep the file name: other workflows look it up.
+# Replaces the Semgrep part of Zedu's Security checks and the ClamAV part of Malware scan (disabled in
+# zedu-hng; their files stay as upstream). Same rule packs, paths and excludes.
 
 on:
   pull_request:
@@ -18,8 +16,7 @@ on:
       - reopened
       - ready_for_review
 
-permissions:
-  contents: read
+permissions: {}
 
 concurrency:
   group: pr-scans-${{ github.event.pull_request.number }}
@@ -27,86 +24,12 @@ concurrency:
 
 jobs:
   scans:
-    name: Scans
+    name: PR scans
     if: github.repository == 'zedu-hng/zedu-fe'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    env:
-      SHA: ${{ github.event.pull_request.head.sha }}
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-        with:
-          persist-credentials: false
-
-      - name: Semgrep
-        id: semgrep
-        continue-on-error: true
-        run: |
-          docker run --rm -v "$PWD:/src" -w /src semgrep/semgrep semgrep scan \
-            --config p/typescript \
-            --config p/react \
-            --config p/nextjs \
-            --config p/security-audit \
-            --error \
-            --metrics off \
-            src
-
-      - name: ClamAV
-        id: clamav
-        continue-on-error: true
-        run: |
-          sudo apt-get update -qq
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq clamav clamav-freshclam
-          sudo systemctl stop clamav-freshclam.service || true
-          sudo freshclam
-          set +e
-          clamscan -ri --exclude-dir='.git' --exclude-dir='node_modules' --exclude-dir='.next' \
-            --max-filesize=20M --max-scansize=50M .
-          status=$?
-          set -e
-          case "$status" in
-            0) echo "ClamAV found no infections." ;;
-            1) echo "::error::ClamAV found infected files."; exit 1 ;;
-            *) echo "::error::ClamAV scan failed with status $status."; exit 1 ;;
-          esac
-
-      - name: Results
-        if: always()
-        env:
-          SEMGREP: ${{ steps.semgrep.outcome }}
-          CLAMAV: ${{ steps.clamav.outcome }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: |
-          failed=0
-          {
-            echo "### PR scans for \`${SHA:0:7}\`"
-            echo
-            echo "| Check | Result |"
-            echo "|---|---|"
-          } >> "$GITHUB_STEP_SUMMARY"
-          : > results.tsv
-          row() {
-            local state=success desc=Passed
-            [ "$2" = success ] || { state=failure; desc="Failed; see the PR scans run"; failed=$((failed + 1)); }
-            printf '%s\t%s\t%s\n' "$1" "$state" "$desc" >> results.tsv
-            echo "| $1 | $state: $desc |" >> "$GITHUB_STEP_SUMMARY"
-          }
-          row "Semgrep" "$SEMGREP"
-          row "ClamAV" "$CLAMAV"
-          jq -Rn --arg sha "$SHA" --arg url "$RUN_URL" \
-            '{sha: $sha, url: $url, checks: [inputs | split("\t") | {context: .[0], state: .[1], description: .[2]}]}' \
-            < results.tsv > pr-checks-results.json
-          echo "fail=$failed" >> "$GITHUB_ENV"
-
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: always()
-        with:
-          name: pr-checks-results
-          path: pr-checks-results.json
-          if-no-files-found: ignore
-          retention-days: 7
-
-      - name: Fail if a scan failed
-        if: always()
-        run: |
-          [ "${fail:-1}" = 0 ] || { echo "::error::${fail:-Some} scan(s) failed; see the summary above."; exit 1; }
+    permissions:
+      contents: read
+    uses: zedu-hng/zedu-ci/.github/workflows/pr-scans.yml@fac7608447c2fd4f4b85e8b5c295a754bbf1d40a
+    with:
+      semgrep_configs: p/typescript p/react p/nextjs p/security-audit
+      semgrep_paths: src
+      clamav_exclude_dirs: node_modules .next

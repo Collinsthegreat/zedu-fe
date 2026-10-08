@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description:
     "Meet the developers, designers, and QA engineers behind Zedu, built by the Zedu-Condor team.",
   openGraph: {
-    title: "Contributors - The People Behind Zedu",
+    title: "Contributors - The Team Behind Zedu",
     description:
       "Zedu is built by a community of developers, designers, and testers. Meet the team.",
     url: siteUrl("/contributors/zedu-condor"),
@@ -46,7 +46,7 @@ const ContributorsPage = () => {
     <div className="space-y-16 pb-16">
       <section className="flex w-full flex-col items-center gap-4 px-4 pt-16 text-center sm:gap-6 sm:px-8 sm:pt-24 lg:px-12">
         <h1 className="text-2xl font-semibold leading-tight text-neutral-900 sm:text-4xl md:text-5xl">
-          The People Behind <span className="text-primary-500">Zedu</span>
+          The Team Behind <span className="text-primary-500">Zedu</span>
         </h1>
         <p className="max-w-[95%] text-xs text-neutral-600 sm:max-w-[80%] sm:text-base md:max-w-[60%] lg:max-w-[45%] lg:text-lg">
           Zedu is built by a community of developers, designers, and testers.
@@ -85,7 +85,7 @@ const ContributorsPage = () => {
 
       <section className="flex w-full flex-col items-center gap-4 px-4 text-center sm:px-8 lg:px-12">
         <h2 className="text-xl font-semibold text-neutral-900 sm:text-3xl">
-          Want to See Your Name Here?
+          Your Name Belongs on Our Team Page
         </h2>
         <p className="max-w-xl text-sm text-neutral-600 sm:text-base">
           Zedu is built by people like you. Join the platform and be part of

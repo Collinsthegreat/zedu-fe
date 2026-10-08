@@ -1,13 +1,8 @@
 name: PR Review recheck
 
-# GitHub does not re-run pull_request workflows when the base branch changes, so a review-rule fix
-# merged to dev would leave open PRs showing a stale, often false, "PR review" failure until someone
-# pushes. On every push to a protected branch this re-runs the latest failed "PR checks" run for each
-# open PR whose only failing check is "PR review" (from the statuses pr-review-comment.yml posts,
-# read for every open PR in one GraphQL query).
-# PRs failing anything else (lint, types, build) wait for the contributor's push: a re-run would
-# rebuild for nothing. The review step fetches the base branch's rules when it runs, so a re-run
-# picks up the fix.
+# Caller: the logic lives in zedu-hng/zedu-ci (pr-review-recheck.yml), pinned by commit. This file sets the
+# triggers, concurrency and token permissions. Keep the file name: other workflows look it up.
+# After a push to dev or central-staging, re-runs PR checks for open PRs whose only failure is PR review.
 
 on:
   push:
@@ -16,54 +11,18 @@ on:
       - central-staging
   workflow_dispatch:
 
-permissions:
-  contents: read
-  actions: write
-  pull-requests: read
+permissions: {}
 
 concurrency:
   group: pr-review-recheck-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  GH_TOKEN: ${{ github.token }}
-  REPO: ${{ github.repository }}
-
 jobs:
   recheck:
-    name: Re-run stale reviews
-    runs-on: ubuntu-latest
-    steps:
-      - name: Re-run checks that failed only on PR review
-        run: |
-          set -o pipefail
-          # One GraphQL read (about 2 points per 100 PRs) gives every open PR's head statuses; a
-          # run lookup follows only for PRs whose sole failing check is PR review.
-          # shellcheck disable=SC2016 # $owner etc. are GraphQL variables, not shell
-          gh api graphql --paginate -F owner="${REPO%%/*}" -F name="${REPO#*/}" -f query='
-            query($owner: String!, $name: String!, $endCursor: String) {
-              repository(owner: $owner, name: $name) {
-                pullRequests(states: OPEN, first: 100, after: $endCursor) {
-                  pageInfo { hasNextPage endCursor }
-                  nodes {
-                    number baseRefName headRefOid
-                    commits(last: 1) { nodes { commit { status { contexts { context state } } } } }
-                  }
-                }
-              }
-            }' |
-          jq -rs '
-            ["File policy","Gitleaks","Malware heuristics","Commit messages","Dependency audit","Prettier","ESLint","TypeScript","PR review","Build"] as $checks
-            | [.[].data.repository.pullRequests.nodes[]][]
-            | select(.baseRefName == "dev" or .baseRefName == "central-staging")
-            | select([.commits.nodes[0].commit.status.contexts[]?
-                      | select((.context as $c | $checks | index($c)) and .state == "FAILURE") | .context] == ["PR review"])
-            | "\(.number) \(.headRefOid)"' > candidates.txt
-          echo "$(grep -c . candidates.txt || true) open PRs fail only on PR review"
-          runs="repos/$REPO/actions/workflows/pr-checks.yml/runs?event=pull_request"
-          while read -r number sha; do
-            run_id=$(gh api "$runs&head_sha=$sha&status=failure&per_page=1" --jq '.workflow_runs[0].id // empty')
-            [ -n "$run_id" ] || continue
-            echo "PR #$number: re-running run $run_id"
-            gh run rerun "$run_id" --repo "$REPO" --failed || true
-          done < candidates.txt
+    name: PR Review recheck
+    if: vars.IS_BOOTCAMP == 'true'
+    permissions:
+      contents: read
+      actions: write
+      pull-requests: read
+    uses: zedu-hng/zedu-ci/.github/workflows/pr-review-recheck.yml@fac7608447c2fd4f4b85e8b5c295a754bbf1d40a

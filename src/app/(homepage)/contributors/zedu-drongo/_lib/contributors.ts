@@ -4,12 +4,12 @@ export type Contributor = {
 };
 
 export const zeduDrongoContributors: Contributor[] = [
-  { name: "Okonkwo Emmanuel", username: "Rabbi_Manuel" },
+  { name: "Emmanuel Okonkwo", username: "Rabbi_Manuel" },
   { name: "Fashina Isaac", username: "Highzik" },
   { name: "Muhammad Mustapha Bello", username: "Muhammad Mustapha Bello" },
   { name: "Atilola Emmanuel", username: "Emmanuel Atilola" },
-  { name: "Muftiat Bakare", username: "dev_elixir" },
-  { name: "Divine John", username: "dicint" },
+  { name: "Bakare Muftiat", username: "dev_elixir" },
+  { name: "John Divine", username: "dicint" },
   { name: "Yaasir Titilope Adigun", username: "Yaasir" },
   { name: "Victor Adeshile", username: "victor_adeshile" },
   { name: "Ikah Collins ifebuche", username: "Idan Codes" },
@@ -22,7 +22,7 @@ export const zeduDrongoContributors: Contributor[] = [
   { name: "Collins", username: "Collins Odogwu" },
   { name: "Moses Ogunade", username: "Cosmic Atomic" },
   { name: "Adefemiwa Damilare Quadry", username: "Dreymi" },
-  { name: "Chukwu Sunday Nwabueze", username: "Maxdesigns01" },
+  { name: "Nwabueze Chukwu Sunday", username: "Maxdesigns01" },
   {
     name: "Lasisi Oluwatimilehin Joshua",
     username: "Lasisi Oluwatimilehin Joshua",
@@ -39,7 +39,7 @@ export const zeduDrongoContributors: Contributor[] = [
   { name: "Moronke Odofin", username: "Sparklynjewel" },
   { name: "Isaac Ogugua Eberechukwu", username: "OBA" },
   { name: "Hilary Chaydee", username: "Lahrry" },
-  { name: "Ozioma Umeoke", username: "Ozioma Umeoke" },
+  { name: "Umeoke Ozioma", username: "Ozioma Umeoke" },
   { name: "Azeezat Morenikeji Olanihun", username: "azeezatolanihun" },
   { name: "MARY IRAWOOLA OLADIMEJI", username: "Mirawoola" },
   { name: "Bolarinwa Oyerinde", username: "bolaoye" },

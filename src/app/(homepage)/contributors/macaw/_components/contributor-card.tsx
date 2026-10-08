@@ -1,15 +1,18 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "~/lib/utils";
 
 export type Contributor = {
+  id: string;
   name: string;
   username: string;
   workspaceEmail: string;
   gitHubEmail: string;
   role: string;
+  hobbies?: string[];
 };
 
 const getInitials = (name: string) =>
@@ -26,7 +29,7 @@ const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
 const ContactLink = ({ value }: { value: string }) => {
   if (!value || value === "N/A") {
-    return <span className="text-neutral-400">—</span>;
+    return <span className="text-neutral-400">&mdash;</span>;
   }
 
   if (isEmail(value)) {
@@ -48,17 +51,35 @@ const ContactLink = ({ value }: { value: string }) => {
   );
 };
 
+const Badge = ({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) => (
+  <span
+    className={cn(
+      "inline-block w-fit shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium",
+      className
+    )}
+  >
+    {children}
+  </span>
+);
+
 export const ContributorCard = ({
   contributor,
 }: {
   contributor: Contributor;
 }) => {
   const [showContactInfo, setShowContactInfo] = useState(false);
-  const { name, username, workspaceEmail, gitHubEmail, role } = contributor;
+  const { id, name, username, workspaceEmail, gitHubEmail, role, hobbies } =
+    contributor;
 
   return (
     <article className="flex flex-col gap-3 rounded-xl border border-neutral-200 bg-white p-4 text-left transition-colors hover:border-primary-200 hover:bg-primary-50/30">
-      <div className="flex items-center gap-3">
+      <div className="flex items-start gap-3">
         <div className="flex size-11 shrink-0 items-center justify-center rounded-full bg-primary-100 text-sm font-semibold text-primary-500">
           {getInitials(name)}
         </div>
@@ -68,12 +89,22 @@ export const ContributorCard = ({
           </h2>
           <p className="truncate text-xs text-neutral-500">{username}</p>
         </div>
-        <span className="shrink-0 rounded-full bg-primary-50/60 px-2.5 py-1 text-[11px] font-medium capitalize text-primary-500">
+        <Badge className="bg-primary-50/60 capitalize text-primary-500">
           {role}
-        </span>
+        </Badge>
       </div>
 
-      <div className="border-t border-neutral-100 pt-3">
+      {!!hobbies?.length && (
+        <ul className="flex flex-wrap gap-1.5">
+          {hobbies.map((hobby) => (
+            <li key={hobby}>
+              <Badge className="bg-neutral-100 text-neutral-600">{hobby}</Badge>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="mt-auto border-t border-neutral-100 pt-3">
         <button
           type="button"
           onClick={() => setShowContactInfo((prev) => !prev)}
@@ -109,6 +140,8 @@ export const ContributorCard = ({
           </dl>
         )}
       </div>
+
+      <span className="sr-only">Contributor #{id}</span>
     </article>
   );
 };
