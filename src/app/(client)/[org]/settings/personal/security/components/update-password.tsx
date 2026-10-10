@@ -11,6 +11,11 @@ import {
 import { PutRequest } from "~/utils/new-request";
 import { showError, showSuccess } from "~/components/toast/sonner";
 import Loading from "~/components/ui/loading";
+import {
+  PASSWORD_HINT,
+  PASSWORD_TOO_SHORT_MESSAGE,
+  isPasswordTooShort,
+} from "~/lib/password";
 const UpdatePassword = () => {
   const [open, setOpen] = useState(false);
   const [buttonLoading, setButtonLoading] = useState(false);
@@ -18,6 +23,7 @@ const UpdatePassword = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
+  const [newPasswordError, setNewPasswordError] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -26,6 +32,11 @@ const UpdatePassword = () => {
 
   const handleSaveNewPassword = async (e: FormEvent) => {
     e.preventDefault();
+
+    if (isPasswordTooShort(newPassword)) {
+      setNewPasswordError(PASSWORD_TOO_SHORT_MESSAGE);
+      return;
+    }
 
     if (newPassword !== confirmPassword) {
       showError("Password does not match");
@@ -112,9 +123,14 @@ const UpdatePassword = () => {
                   id="new-password"
                   placeholder="*********"
                   type={showNewPassword ? "text" : "password"}
+                  aria-describedby="new-password-help"
+                  aria-invalid={Boolean(newPasswordError)}
                   className="w-full border rounded px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
+                  onChange={(e) => {
+                    setNewPassword(e.target.value);
+                    setNewPasswordError("");
+                  }}
                 />
                 <button
                   type="button"
@@ -124,6 +140,14 @@ const UpdatePassword = () => {
                   {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              <p
+                id="new-password-help"
+                className={`mt-1 text-xs ${
+                  newPasswordError ? "text-red-500" : "text-gray-500"
+                }`}
+              >
+                {newPasswordError || PASSWORD_HINT}
+              </p>
             </div>
 
             <div className="mb-4">
