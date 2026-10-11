@@ -68,12 +68,23 @@ export default function ChannelsTab() {
   }, [searchInput, filter, channelType]);
 
   useEffect(() => {
-    setShowBanner(localStorage.getItem(CHANNELS_TIP_DISMISSED_KEY) !== "true");
+    // localStorage can throw (e.g. blocked storage); fall back to showing the tip.
+    try {
+      setShowBanner(
+        localStorage.getItem(CHANNELS_TIP_DISMISSED_KEY) !== "true"
+      );
+    } catch {
+      setShowBanner(true);
+    }
   }, []);
 
   const dismissBanner = () => {
-    localStorage.setItem(CHANNELS_TIP_DISMISSED_KEY, "true");
     setShowBanner(false);
+    try {
+      localStorage.setItem(CHANNELS_TIP_DISMISSED_KEY, "true");
+    } catch {
+      // Storage unavailable: the tip is still hidden for this visit.
+    }
   };
 
   if (channelloading) {
