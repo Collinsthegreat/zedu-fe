@@ -18,6 +18,10 @@ import {
   prepareChannelSubscription,
   releaseChannelSubscription,
 } from "~/lib/centrifugo/shared-centrifuge";
+import {
+  showCallNotification,
+  closeCallNotification,
+} from "~/lib/notifications/call-notification";
 
 const CLIENT_URL = process.env.NEXT_PUBLIC_CLIENT_URL;
 
@@ -70,11 +74,16 @@ export default function GeneralNotificationConnection() {
 
   // centrifugo connection for notification
   useEffect(() => {
-    const localUser =
-      typeof window !== "undefined"
-        ? JSON.parse(localStorage.getItem("user") || "{}")
-        : {};
-    const userId = resolvedUserId || localUser?.id || localUser?.user_id;
+    let fallbackUserId = "";
+    if (!resolvedUserId && typeof window !== "undefined") {
+      try {
+        const stored = JSON.parse(localStorage.getItem("user") || "{}");
+        fallbackUserId = stored?.id || stored?.user_id || "";
+      } catch {
+        // ignore invalid stored user JSON in fallback
+      }
+    }
+    const userId = resolvedUserId || fallbackUserId;
     if (!orgId || !userId) return;
 
     const channel = `${orgId}/${userId}`;
@@ -284,27 +293,11 @@ export default function GeneralNotificationConnection() {
         });
 
         // Trigger native browser notification if user is in another tab/app
-        if (
-          typeof window !== "undefined" &&
-          "Notification" in window &&
-          Notification.permission === "granted" &&
-          document.visibilityState !== "visible"
-        ) {
-          try {
-            const notif = new Notification(`${callerName} is buzzing you!`, {
-              body: "Click to join the buzz",
-              icon: typeof avatarUrl === "string" ? avatarUrl : undefined,
-              tag: `buzz-${buzzId}`,
-              requireInteraction: true,
-            });
-            notif.onclick = () => {
-              window.focus();
-              notif.close();
-            };
-          } catch {
-            // ignore
-          }
-        }
+        showCallNotification({
+          callerName,
+          avatarUrl,
+          buzzId,
+        });
       }
 
       if (result?.notification_type === "direct_call_response") {
@@ -320,6 +313,7 @@ export default function GeneralNotificationConnection() {
 
         if (joinStatus === "accept" || joinStatus === "accepted") {
           dispatch({ type: ACTIONS.HIDE_INCOMING_CALL_POPUP });
+          closeCallNotification(payload?.buzz_id || payload?.buzzId);
         }
 
         if (
@@ -425,7 +419,7 @@ export default function GeneralNotificationConnection() {
         }
       }
 
-      // Handle direct call canceled: hide popup only
+      // Handle direct call canceled: hide popup and close native notification
       const isCallCanceled =
         notifType === "direct_call_canceled" ||
         notifType === "direct_call_cancelled" ||
@@ -434,6 +428,13 @@ export default function GeneralNotificationConnection() {
 
       if (isCallCanceled) {
         dispatch({ type: ACTIONS.HIDE_INCOMING_CALL_POPUP });
+        const cancelBuzzId =
+          result?.data?.buzz_id ||
+          result?.data?.buzzId ||
+          result?.data?.buzz_code ||
+          result?.buzz_id ||
+          result?.buzzId;
+        closeCallNotification(cancelBuzzId);
       }
 
       if (
@@ -473,6 +474,7 @@ export default function GeneralNotificationConnection() {
       sub.off("publication", onPublication);
       sub.off("error", onError);
       releaseChannelSubscription(centrifugeClient, channel, sub);
+      closeCallNotification();
     };
   }, [dispatch, orgId, resolvedUserId]);
 

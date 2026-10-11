@@ -18,6 +18,7 @@ import { ACTIONS } from "~/store/Actions";
 import { openBuzzInNewTab } from "~/lib/buzz/open-buzz-tab";
 import { ensureCentrifugeConnected } from "~/lib/centrifugo/ensure-connected";
 import images from "~/assets/images";
+import { closeCallNotification } from "~/lib/notifications/call-notification";
 
 const getString = (value: unknown): string | null =>
   typeof value === "string" && value.trim().length > 0 ? value.trim() : null;
@@ -227,6 +228,12 @@ export default function OneSignalProvider() {
 
       if (isCallCanceled) {
         dispatch({ type: ACTIONS.HIDE_INCOMING_CALL_POPUP });
+        const buzzId =
+          getString(foregroundData?.buzz_id) ||
+          getString(foregroundData?.buzzId) ||
+          getString(foregroundData?.buzz_code) ||
+          "";
+        closeCallNotification(buzzId);
         if (audioPlayer.current) {
           audioPlayer.current.pause();
           audioPlayer.current.currentTime = 0;

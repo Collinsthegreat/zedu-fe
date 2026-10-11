@@ -3,6 +3,7 @@ import { DataContext } from "~/store/GlobalState";
 import { ACTIONS } from "~/store/Actions";
 import IncomingCallPopup from "~/app/(client)/[org]/_components/buzz-management/IncomingCallPopup";
 import { PostRequest } from "~/utils/new-request";
+import { closeCallNotification } from "~/lib/notifications/call-notification";
 
 export default function IncomingCallPopupContainer() {
   const [loading, setLoading] = useState(false);
@@ -64,6 +65,7 @@ export default function IncomingCallPopupContainer() {
 
         setLoading(false);
       }
+      if (info.buzzId) closeCallNotification(info.buzzId);
       dispatch({ type: "HIDE_INCOMING_CALL_POPUP" });
     }
   }, [dispatch, user]);
@@ -71,6 +73,7 @@ export default function IncomingCallPopupContainer() {
   const handleDecline = useCallback(async () => {
     const info = callInfoRef.current;
     if (!info) return;
+    if (info.buzzId) closeCallNotification(info.buzzId);
     await PostRequest(`/buzz/${info.buzzId}/respond`, { action: "decline" });
     dispatch({ type: "HIDE_INCOMING_CALL_POPUP" });
   }, [dispatch]);
@@ -79,6 +82,7 @@ export default function IncomingCallPopupContainer() {
     // Notify backend of timeout
     const info = callInfoRef.current;
     if (info?.buzzId) {
+      closeCallNotification(info.buzzId);
       try {
         await PostRequest(`/buzz/${info.buzzId}/respond`, {
           action: "timeout",
