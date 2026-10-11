@@ -21,20 +21,25 @@ import { Channel } from "~/types/channel";
 import { PostRequest } from "~/utils/new-request";
 import Loading from "~/components/ui/loading";
 
-const CHANNELS_TIP_DISMISSED_KEY = "channelsTipDismissed";
-
+/**
+ * Directories → Channels tab: lists the organisation's channels with search,
+ * filters and sorting, and lets the user open or join a channel.
+ */
 export default function ChannelsTab() {
+  const CHANNELS_TIP_DISMISSED_KEY = "channelsTipDismissed";
   const { state, dispatch } = useContext(DataContext);
   const { allChannels, channelloading, orgSlug } = state;
   const router = useRouter();
 
-  // Hidden until we know the user hasn't dismissed it, so it doesn't flash.
-  const [showBanner, setShowBanner] = useState(false);
+  const [showBanner, setShowBanner] = useState(true);
   const [filter, setFilter] = useState("All channels");
   const [channelType, setChannelType] = useState("All channel type");
   const [sortOrder, setSortOrder] = useState("A to Z");
   const [searchInput, setSearchInput] = useState("");
   const [buttonLoading, setButtonloading] = useState(false);
+  // The tip stays hidden until we've checked whether it was dismissed, so it
+  // doesn't flash for returning users.
+  const [tipChecked, setTipChecked] = useState(false);
 
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const [showTypeMenu, setShowTypeMenu] = useState(false);
@@ -76,6 +81,7 @@ export default function ChannelsTab() {
     } catch {
       setShowBanner(true);
     }
+    setTipChecked(true);
   }, []);
 
   const dismissBanner = () => {
@@ -195,7 +201,7 @@ export default function ChannelsTab() {
         <CreateChannelDialog />
       </div>
 
-      {showBanner && (
+      {tipChecked && showBanner && (
         <div className="flex items-center gap-3 rounded-lg border border-[#c5e5f3] dark:border-[#1A3F66] bg-[#e8f5fa] dark:bg-[#1A3F66]/40 px-3 py-2 mb-4 text-[13px] text-[#454245] dark:text-zinc-300">
           <Lightbulb
             size={16}
