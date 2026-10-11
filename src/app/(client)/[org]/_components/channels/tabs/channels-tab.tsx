@@ -20,6 +20,10 @@ import { Channel } from "~/types/channel";
 import { PostRequest } from "~/utils/new-request";
 import Loading from "~/components/ui/loading";
 
+/**
+ * Directories → Channels tab: lists the organisation's channels with search,
+ * filters and sorting, and lets the user open or join a channel.
+ */
 export default function ChannelsTab() {
   const { state, dispatch } = useContext(DataContext);
   const { allChannels, channelloading, orgSlug } = state;
