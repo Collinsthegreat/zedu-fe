@@ -1,11 +1,11 @@
+import { WhyFeatureCard } from "../ui/WhyFeatureCard";
 import { WhyCard } from "../ui/WhyCard";
 import { ArrowBtn } from "../ui/Button";
 import { otherReasons, whyCardsData } from "../../_lib";
 import Image from "next/image";
-import { GraduationCap, Sparkles, Users } from "lucide-react";
+import { GraduationCap, Users } from "lucide-react";
 
-// One icon per card, in the same order as whyCardsData: education, cohorts, AI.
-const whyCardIcons = [GraduationCap, Users, Sparkles];
+const whyCardIcons = [GraduationCap, Users];
 
 export const WhySection = () => {
   return (
@@ -22,26 +22,14 @@ export const WhySection = () => {
         </div>
 
         <div className="grid w-full max-w-7xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-          {whyCardsData.map((card, index) => {
-            const Icon = whyCardIcons[index] ?? Sparkles;
-            return (
-              <article
-                key={card.title}
-                className="flex flex-col items-start rounded-2xl border border-primary-100 bg-white px-6 pb-8 pt-7 text-left sm:px-8 sm:pb-10 sm:pt-9"
-              >
-                <span
-                  aria-hidden="true"
-                  className="mb-5 flex size-12 items-center justify-center rounded-xl bg-primary-500 text-white sm:mb-7 sm:size-[52px]"
-                >
-                  <Icon className="size-6" strokeWidth={2} />
-                </span>
-                <h3 className="mb-3 text-xl font-bold leading-snug text-blue-500">
-                  {card.title}
-                </h3>
-                <p className="leading-relaxed text-neutral-600">{card.desc}</p>
-              </article>
-            );
-          })}
+          {whyCardsData.map((card, index) => (
+            <WhyFeatureCard
+              key={card.title}
+              title={card.title}
+              desc={card.desc}
+              icon={whyCardIcons[index]}
+            />
+          ))}
         </div>
       </section>
 
