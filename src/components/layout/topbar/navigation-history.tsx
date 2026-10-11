@@ -1,6 +1,6 @@
 "use client";
 
-import { useContext, useEffect, useReducer, useRef } from "react";
+import { useContext, useEffect, useReducer, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -126,6 +126,7 @@ function HistoryControls({
   const { state } = useContext(DataContext);
   const pathname = usePathname();
   const router = useRouter();
+  const [historyOpen, setHistoryOpen] = useState(false);
   const pending = useRef<{ path: string; cursor?: number } | null>(null);
   const [history, dispatch] = useReducer(reducer, empty, () => {
     try {
@@ -281,7 +282,13 @@ function HistoryControls({
       >
         <ArrowRight className="h-4 w-4" />
       </Button>
-      <DropdownMenu>
+      <DropdownMenu
+        open={historyOpen}
+        onOpenChange={(open) => {
+          // Radix also requests dismissal on window blur; keep History visible.
+          if (open || document.hasFocus()) setHistoryOpen(open);
+        }}
+      >
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
@@ -295,9 +302,11 @@ function HistoryControls({
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="start"
+          onEscapeKeyDown={() => setHistoryOpen(false)}
+          onPointerDownOutside={() => setHistoryOpen(false)}
           className="max-h-80 w-72 max-w-[calc(100vw-2rem)] overflow-y-auto"
         >
-          <DropdownMenuLabel className="font-normal text-muted-foreground">
+          <DropdownMenuLabel className="cursor-default select-none font-normal text-muted-foreground">
             Recent
           </DropdownMenuLabel>
           {history.recent.length === 0 && (
@@ -315,7 +324,11 @@ function HistoryControls({
             return (
               <DropdownMenuItem
                 key={entry.path}
-                onSelect={() => navigate(entry)}
+                className="cursor-pointer hover:bg-blue-500 hover:text-white focus:bg-blue-500 focus:text-white"
+                onSelect={() => {
+                  setHistoryOpen(false);
+                  navigate(entry);
+                }}
                 aria-current={entry.path === pathname ? "page" : undefined}
               >
                 <Icon className="mr-2 h-4 w-4 shrink-0" />
