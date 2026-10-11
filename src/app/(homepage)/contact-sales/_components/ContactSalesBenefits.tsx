@@ -4,9 +4,10 @@ import { contactSalesBenefits } from "./contactSalesData";
 
 export const ContactSalesBenefits = () => {
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-col gap-4 text-left sm:gap-5 lg:pl-4">
-      <h1 className="text-3xl font-semibold leading-tight text-[#171717] sm:text-4xl lg:text-5xl">
-        Talk with our <span className="text-[#6f4ef6]">sales team</span>
+    <div className="flex w-full max-w-xl flex-col gap-4 text-left sm:gap-5">
+      <h1 className="text-3xl/tight font-semibold text-[#171717] sm:text-4xl/tight lg:text-5xl/tight">
+        Talk with our{" "}
+        <span className="whitespace-nowrap text-[#6f4ef6]">sales team</span>
       </h1>
 
       <p className="text-base text-[#4b4b4b] sm:text-lg">
