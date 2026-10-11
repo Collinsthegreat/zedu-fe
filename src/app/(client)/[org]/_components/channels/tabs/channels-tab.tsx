@@ -31,6 +31,16 @@ export default function ChannelsTab() {
   const { allChannels, channelloading, orgSlug } = state;
   const router = useRouter();
 
+  // The all-channels list can lag behind the user's own channel list, so
+  // treat a channel as joined if either source says the user is a member.
+  const joinedChannelIds = new Set(
+    (Array.isArray(state?.channels) ? state.channels : []).map(
+      (item: Channel) => item?.channels_id
+    )
+  );
+  const isJoined = (channel: Channel) =>
+    channel.access === true || joinedChannelIds.has(channel.channels_id);
+
   const [showBanner, setShowBanner] = useState(true);
   const [filter, setFilter] = useState("All channels");
   const [channelType, setChannelType] = useState("All channel type");
