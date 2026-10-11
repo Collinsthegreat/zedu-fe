@@ -203,6 +203,7 @@ export default function ChannelsTab() {
         <div className="flex items-center gap-3 rounded-lg border border-[#c5e5f3] dark:border-[#1A3F66] bg-[#e8f5fa] dark:bg-[#1A3F66]/40 px-3 py-2 mb-4 text-[13px] text-[#454245] dark:text-zinc-300">
           <Lightbulb
             size={16}
+            aria-hidden="true"
             className="shrink-0 text-[#1264a3] dark:text-sky-300"
           />
           <p className="flex-1">
