@@ -94,6 +94,20 @@ export const TEAM: Team = {
       field: "Product Management",
     },
     {
+      fullName: "Hafeezah Kadiri",
+      zeduUsername: "Hafeey",
+      githubUsername: "HAFEEZAH029",
+      role: "Member",
+      field: "Frontend Developer",
+    },
+    {
+      fullName: "Joshua Emmanuel",
+      zeduUsername: "joshua_emmanuel",
+      githubUsername: "joshua-emmanuel",
+      role: "Member",
+      field: "Frontend Developer",
+    },
+    {
       fullName: "Uyanwanne Emmanuel Chukwudaru",
       zeduUsername: "emmyanzo",
       githubUsername: "emmyanzx",
