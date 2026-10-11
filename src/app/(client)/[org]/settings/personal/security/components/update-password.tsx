@@ -97,6 +97,7 @@ const UpdatePassword = () => {
                   id="password"
                   placeholder="*********"
                   type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
                   className="w-full border rounded px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   value={oldPassword}
                   onChange={(e) => setOldPassword(e.target.value)}
@@ -125,6 +126,7 @@ const UpdatePassword = () => {
                   type={showNewPassword ? "text" : "password"}
                   aria-describedby="new-password-help"
                   aria-invalid={Boolean(newPasswordError)}
+                  autoComplete="new-password"
                   className="w-full border rounded px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   value={newPassword}
                   onChange={(e) => {
@@ -162,6 +164,7 @@ const UpdatePassword = () => {
                   id="confirm-password"
                   placeholder="*********"
                   type={showConfirmPassword ? "text" : "password"}
+                  autoComplete="new-password"
                   className="w-full border rounded px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-purple-500"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}

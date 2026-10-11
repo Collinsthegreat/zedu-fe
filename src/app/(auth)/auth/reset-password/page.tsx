@@ -215,6 +215,7 @@ function ResetPassword() {
                       placeholder="Password"
                       aria-describedby="new-password-help"
                       aria-invalid={Boolean(errors.password)}
+                      autoComplete="new-password"
                       className={`w-full text-[12px] text-[#667085] leading-[15.12px] font-[500] h-[48px] border ${
                         errors.password
                           ? "border-[#F81404]"
@@ -258,6 +259,7 @@ function ResetPassword() {
                       value={confirmPassword}
                       onChange={handleConfirmPasswordChange}
                       placeholder="Confirm New Password"
+                      autoComplete="new-password"
                       className={`w-full text-[12px] text-[#667085] leading-[15.12px] font-[500] h-[48px] border ${
                         errors.confirmPassword
                           ? "border-[#F81404]"
