@@ -47,9 +47,10 @@ export const GuideResourceCard = ({
 
         <Link
           href={link}
-          className="inline-flex items-center gap-2 text-sm font-medium text-primary-500 hover:text-primary-600 transition-colors mt-3"
+          className="inline-flex items-center gap-2 text-sm font-semibold bg-primary-50 text-primary-600 rounded-full px-3 py-1.5 hover:bg-primary-100 transition-colors mt-3 w-fit"
         >
-          Read article <ArrowRight size={16} />
+          Read article
+          <ArrowRight size={16} />
         </Link>
       </div>
     </div>
