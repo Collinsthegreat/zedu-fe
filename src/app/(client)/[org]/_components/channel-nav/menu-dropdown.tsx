@@ -15,8 +15,8 @@ import NotificationSettingsModal from "../notification-modal";
 import { ACTIONS } from "~/store/Actions";
 import { DataContext } from "~/store/GlobalState";
 import { PostRequest } from "~/utils/new-request";
-import Loading from "~/components/ui/loading";
 import { useRBAC } from "~/hooks/useRBAC";
+import { LeaveChannelDialog } from "../channel-details-dialog/leave-channel-dialog";
 
 interface MenuDropdownProps {
   isOpen: boolean;
@@ -28,6 +28,7 @@ const MenuDropdown = ({ isOpen, onClose }: MenuDropdownProps) => {
   const { state, dispatch } = useContext(DataContext);
   const [buttonLoading, setButtonLoading] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [leaveOpen, setLeaveOpen] = useState(false);
   const router = useRouter();
   const params = useParams();
   const id = params?.id as string;
@@ -68,9 +69,15 @@ const MenuDropdown = ({ isOpen, onClose }: MenuDropdownProps) => {
         type: ACTIONS.LEAVE_CALLBACK,
         payload: !state?.leaveCallback,
       });
-      onClose();
+      setLeaveOpen(false);
     }
     setButtonLoading(false);
+  };
+
+  const handleOpenLeave = (event: ReactMouseEvent) => {
+    event.stopPropagation();
+    setLeaveOpen(true);
+    onClose();
   };
 
   const handleOpenExport = (event: ReactMouseEvent) => {
@@ -131,12 +138,9 @@ const MenuDropdown = ({ isOpen, onClose }: MenuDropdownProps) => {
 
             <div
               className={`${menuItemClass} text-[#B00E03]`}
-              onClick={handleLeave}
+              onClick={handleOpenLeave}
             >
-              Leave channel{" "}
-              {buttonLoading && (
-                <Loading color="red" height="15px" width="15px" />
-              )}
+              Leave channel
             </div>
           </div>
         </div>
@@ -146,6 +150,15 @@ const MenuDropdown = ({ isOpen, onClose }: MenuDropdownProps) => {
         open={exportOpen}
         onOpenChange={setExportOpen}
         channelId={id}
+      />
+
+      <LeaveChannelDialog
+        open={leaveOpen}
+        onOpenChange={setLeaveOpen}
+        channelName={state?.channelDetails?.name}
+        isPrivate={state?.channelDetails?.is_private}
+        loading={buttonLoading}
+        onConfirm={handleLeave}
       />
     </>
   );
