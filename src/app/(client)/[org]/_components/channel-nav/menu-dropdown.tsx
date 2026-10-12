@@ -34,6 +34,16 @@ const MenuDropdown = ({ isOpen, onClose }: MenuDropdownProps) => {
   const id = params?.id as string;
   const { hasPermission } = useRBAC();
   const canManageChannels = hasPermission("manage:channels");
+  // channelDetails can still hold the previous channel while the new one loads,
+  // so only use it when it belongs to the channel in the URL.
+  const detailsMatch =
+    String(state?.channelDetails?.channels_id || "") === String(id || "");
+  const leaveChannelName = detailsMatch
+    ? state?.channelDetails?.name || state?.channelName
+    : state?.channelName;
+  const leaveIsPrivate = detailsMatch
+    ? Boolean(state?.channelDetails?.is_private)
+    : undefined;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -155,8 +165,8 @@ const MenuDropdown = ({ isOpen, onClose }: MenuDropdownProps) => {
       <LeaveChannelDialog
         open={leaveOpen}
         onOpenChange={setLeaveOpen}
-        channelName={state?.channelDetails?.name}
-        isPrivate={state?.channelDetails?.is_private}
+        channelName={leaveChannelName}
+        isPrivate={leaveIsPrivate}
         loading={buttonLoading}
         onConfirm={handleLeave}
       />

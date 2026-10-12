@@ -17,6 +17,7 @@ interface LeaveChannelDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   channelName?: string;
+  /** Leave undefined when privacy isn't known yet; a neutral message is shown. */
   isPrivate?: boolean;
   loading?: boolean;
   onConfirm: () => void;
@@ -31,6 +32,12 @@ export const LeaveChannelDialog = ({
   onConfirm,
 }: LeaveChannelDialogProps) => {
   const name = channelName ? `#${channelName}` : "this channel";
+  const message =
+    isPrivate === true
+      ? "This is a private channel. Once you leave, you won't see its messages, and you'll need to be invited again to rejoin."
+      : isPrivate === false
+        ? "You'll stop receiving messages from this channel. You can rejoin it any time from the channel directory."
+        : "You'll stop receiving messages from this channel. If it's private, you'll need to be invited again to rejoin.";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -52,11 +59,7 @@ export const LeaveChannelDialog = ({
           asChild
           className="text-sm text-[#344054] dark:text-zinc-300 p-5"
         >
-          <p>
-            {isPrivate
-              ? "This is a private channel. Once you leave, you won't see its messages, and you'll need to be invited again to rejoin."
-              : "You'll stop receiving messages from this channel. You can rejoin it any time from the channel directory."}
-          </p>
+          <p>{message}</p>
         </DialogDescription>
 
         <DialogFooter className="flex justify-end space-x-2 p-5">
