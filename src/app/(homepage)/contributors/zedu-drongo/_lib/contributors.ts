@@ -8,7 +8,7 @@ export const zeduDrongoContributors: Contributor[] = [
   { name: "Fashina Isaac", username: "Highzik" },
   { name: "Muhammad Mustapha Bello", username: "Muhammad Mustapha Bello" },
   { name: "Atilola Emmanuel", username: "Emmanuel Atilola" },
-  { name: "Bakare Muftiat", username: "dev_elixir" },
+  { name: "Muftiat Bakare", username: "dev_elixir" },
   { name: "John Divine", username: "dicint" },
   { name: "Yaasir Titilope Adigun", username: "Yaasir" },
   { name: "Victor Adeshile", username: "victor_adeshile" },
