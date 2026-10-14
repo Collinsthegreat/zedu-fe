@@ -24,6 +24,7 @@ import { ArrowDownIcon, Pin } from "lucide-react";
 import { BookmarkFilledIcon } from "@radix-ui/react-icons";
 import { useMessageHighlight } from "~/hooks/use-message-highlight";
 import { useMessageDeepLink } from "~/hooks/use-message-deep-link";
+import { ScrollToLatestButton } from "~/components/ui/scroll-to-latest-button";
 
 const ChannelsMessage = () => {
   const { fetchMoreData, hasMore, loading } = UseChannel();
@@ -67,7 +68,7 @@ const ChannelsMessage = () => {
     if (!container) return;
 
     const handleScroll = () => {
-      const isAtBottom = container.scrollTop >= 0;
+      const isAtBottom = container.scrollTop <= 0;
 
       if (isAtBottom) {
         getData();
@@ -129,7 +130,7 @@ const ChannelsMessage = () => {
         flexDirection: "column-reverse",
         paddingBottom: "var(--chat-composer-height, 140px)",
       }}
-      className="w-full"
+      className="w-full relative"
     >
       {showBadge && state?.threadCount > 0 && (
         <Badge
@@ -137,6 +138,7 @@ const ChannelsMessage = () => {
             if (scrollableContainerRef.current) {
               scrollableContainerRef.current.scrollTop = 0;
             }
+            getData();
             dispatch({
               type: ACTIONS.COUNT_CALLBACK,
               payload: !state?.countCallback,
@@ -148,6 +150,12 @@ const ChannelsMessage = () => {
           Latest messages
         </Badge>
       )}
+
+      <ScrollToLatestButton
+        scrollContainerRef={scrollableContainerRef}
+        isAtBottom={!showBadge}
+        onScrollToBottom={getData}
+      />
 
       <InfiniteScroll
         dataLength={messages?.length || 0}
