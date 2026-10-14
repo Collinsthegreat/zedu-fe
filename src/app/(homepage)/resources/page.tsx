@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { GuideResourceCard } from "./_components/guide-resource-card";
@@ -8,6 +9,7 @@ import { WebinarResourceCard } from "./_components/webinar-resource-card";
 import { tabs, resources } from "../_lib/resources";
 import { DynamicFooter } from "../_components/footer/dynamic-footer";
 const ResourcesPage = () => {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState("guides");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -58,7 +60,11 @@ const ResourcesPage = () => {
                 key={tab.id}
                 role="tab"
                 aria-selected={activeTab === tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() =>
+                  tab.id === "templates"
+                    ? router.push("/templates")
+                    : setActiveTab(tab.id)
+                }
                 className={`shrink-0 rounded-full px-5 py-2 text-sm font-medium transition-colors md:px-6 ${
                   activeTab === tab.id
                     ? "bg-white text-primary-500 shadow-sm"
