@@ -10,6 +10,7 @@ interface ScrollToLatestButtonProps {
   isAtBottom: boolean;
   onScrollToBottom?: () => void;
   className?: string;
+  scrollToTop?: boolean;
 }
 
 export const ScrollToLatestButton = ({
@@ -17,13 +18,18 @@ export const ScrollToLatestButton = ({
   isAtBottom,
   onScrollToBottom,
   className,
+  scrollToTop = true,
 }: ScrollToLatestButtonProps) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
   const handleClick = () => {
     const container = scrollContainerRef.current;
     if (container) {
-      container.scrollTo({ top: 0, behavior: "smooth" });
+      if (scrollToTop) {
+        container.scrollTo({ top: 0, behavior: "smooth" });
+      } else {
+        container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+      }
     }
     onScrollToBottom?.();
   };
@@ -54,6 +60,8 @@ export const ScrollToLatestButton = ({
       )}
       onClick={handleClick}
       aria-label="Scroll to latest messages"
+      disabled={isAtBottom}
+      tabIndex={isAtBottom ? -1 : 0}
     >
       <ChevronDown size={18} strokeWidth={2.5} className="text-primary" />
     </Button>

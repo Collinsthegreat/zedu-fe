@@ -67,7 +67,7 @@ const PeopleMessage = ({ participant }: any) => {
     if (!container) return;
 
     const handleScroll = () => {
-      const isAtBottom = container.scrollTop <= 0;
+      const isAtBottom = container.scrollTop >= -1;
 
       if (isAtBottom) {
         getData();
