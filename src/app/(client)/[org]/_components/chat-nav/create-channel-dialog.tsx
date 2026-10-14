@@ -41,10 +41,12 @@ const CreateChannelDialog = () => {
       });
 
       const channelId = res?.data?.data?.channels_id;
-      localStorage.setItem("channelName", res?.data?.data?.name);
+      // Fall back to the submitted name when the response omits data.name.
+      const createdName = res?.data?.data?.name || channelName;
+      localStorage.setItem("channelName", createdName);
       localStorage.setItem("channelId", channelId);
 
-      showSuccess("Channel created", `#${res?.data?.data?.name}`);
+      showSuccess("Channel created", `#${createdName}`);
 
       setOpen(false);
       setChannelName("");
