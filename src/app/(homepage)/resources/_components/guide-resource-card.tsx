@@ -45,13 +45,19 @@ export const GuideResourceCard = ({
           </p>
         </div>
 
-        <Link
-          href={link}
-          className="inline-flex items-center gap-2 text-sm font-semibold bg-primary-50 text-primary-600 rounded-full px-3 py-1.5 hover:bg-primary-100 transition-colors mt-3 w-fit"
-        >
-          Read article
-          <ArrowRight size={16} />
-        </Link>
+        {link === "#" ? (
+          <span className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-400 mt-3">
+            Coming soon
+          </span>
+        ) : (
+          <Link
+            href={link}
+            className="inline-flex items-center gap-2 text-sm font-semibold bg-primary-500 text-white rounded-full px-4 py-1.5 hover:bg-primary-600 transition-colors mt-3 w-fit"
+          >
+            Read article
+            <ArrowRight size={16} />
+          </Link>
+        )}
       </div>
     </div>
   );
