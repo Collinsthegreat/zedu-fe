@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Plus_Jakarta_Sans } from "next/font/google";
-import { PostRequest } from "~/utils/request";
-import { showError, showSuccess } from "~/components/toast/sonner";
+import axios from "axios";
+import { showSuccess } from "~/components/toast/sonner";
 import {
   appStoreUrl,
   facebookUrl,
@@ -153,22 +153,27 @@ const Footer = () => {
 
     try {
       const token = localStorage.getItem("token") || "";
-      const req = await PostRequest("/newsletter", { email }, token);
+      const req = await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/newsletter`,
+        { email },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       const isSuccess =
         (req?.status === 201 ||
           req?.status === 200 ||
           req?.data?.status_code === 201 ||
           req?.data?.status_code === 200) &&
-        !req?.isAxiosError &&
         req?.status !== 409 &&
-        req?.response?.status !== 409;
+        req?.data?.status_code !== 409;
 
       const isAlreadySubscribed =
-        req?.status === 409 ||
-        req?.response?.status === 409 ||
-        req?.data?.status_code === 409 ||
-        req?.response?.data?.status_code === 409;
+        req?.status === 409 || req?.data?.status_code === 409;
 
       if (isSuccess) {
         setEmail("");
@@ -183,8 +188,7 @@ const Footer = () => {
         );
       } else {
         setError(
-          req?.response?.data?.message ||
-            req?.data?.message ||
+          req?.data?.message ||
             "We couldn't subscribe you right now. Please try again."
         );
       }
@@ -208,7 +212,6 @@ const Footer = () => {
           "Something went wrong. Please try again.";
 
         setError(message);
-        showError("Subscription failed", message);
       }
     } finally {
       setLoading(false);
