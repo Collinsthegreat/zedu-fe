@@ -23,6 +23,7 @@ import { Badge } from "~/components/ui/badge";
 import { ArrowDownIcon, Pin } from "lucide-react";
 import { BookmarkFilledIcon } from "@radix-ui/react-icons";
 import MessageBox from "../message-box";
+import { ScrollToLatestButton } from "~/components/ui/scroll-to-latest-button";
 
 import ChannelConnection from "~/components/layout/centrifugo/channel-connection";
 
@@ -49,7 +50,7 @@ const BuzzChat = () => {
     if (!container) return;
 
     const handleScroll = () => {
-      const isAtBottom = container.scrollTop >= 0;
+      const isAtBottom = container.scrollTop <= 0;
 
       if (isAtBottom) {
         getData();
@@ -137,7 +138,7 @@ const BuzzChat = () => {
             display: "flex",
             flexDirection: "column-reverse",
           }}
-          className="w-full"
+          className="w-full relative"
         >
           {showBadge && state?.threadCount > 0 && (
             <Badge
@@ -156,6 +157,12 @@ const BuzzChat = () => {
               Latest messages
             </Badge>
           )}
+
+          <ScrollToLatestButton
+            scrollContainerRef={scrollableContainerRef}
+            isAtBottom={!showBadge}
+            onScrollToBottom={getData}
+          />
 
           <InfiniteScroll
             dataLength={messages?.length || 0}
