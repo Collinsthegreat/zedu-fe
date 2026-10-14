@@ -52,21 +52,13 @@ const FloatingLabelInput = React.forwardRef<
   HTMLInputElement,
   FloatingLabelInputProps
 >(({ className, label, error, icon, type, id, ...props }, ref) => {
-  const inputId = id || label.toLowerCase().replace(/\s+/g, "-");
-  const hasValue = props.value || props.defaultValue;
+  const generatedId = React.useId();
+  const inputId = id ?? generatedId;
   const isError = !!error;
+  const errorId = isError ? `${inputId}-error` : undefined;
 
   return (
     <div className="relative w-full">
-      <Label
-        htmlFor={inputId}
-        className={cn(
-          "absolute left-3 top-1/2 -translate-y-1/2 text-[#667085] transition-all duration-150 ease-out pointer-events-none peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-[14px] peer-focus:top-[-8px] peer-focus:-translate-y-0 peer-focus:text-[11px] peer-focus:text-[#7141F8] peer-[&:not(:placeholder-shown)]:top-[-8px] peer-[&:not(:placeholder-shown)]:-translate-y-0 peer-[&:not(:placeholder-shown)]:text-[11px] peer-[&:not(:placeholder-shown)]:text-[#7141F8] data-[error=true]:text-[#F81404]",
-          className
-        )}
-      >
-        {label}
-      </Label>
       <input
         ref={ref}
         id={inputId}
@@ -80,14 +72,29 @@ const FloatingLabelInput = React.forwardRef<
           className
         )}
         {...props}
+        aria-invalid={isError ? true : props["aria-invalid"]}
+        aria-errormessage={isError ? errorId : props["aria-errormessage"]}
       />
+      <Label
+        htmlFor={inputId}
+        className={cn(
+          "absolute left-3 top-1/2 -translate-y-1/2 text-[#667085] transition-all duration-150 ease-out pointer-events-none peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-[14px] peer-focus:top-[-8px] peer-focus:-translate-y-0 peer-focus:text-[11px] peer-focus:text-[#7141F8] peer-[&:not(:placeholder-shown)]:top-[-8px] peer-[&:not(:placeholder-shown)]:-translate-y-0 peer-[&:not(:placeholder-shown)]:text-[11px] peer-[&:not(:placeholder-shown)]:text-[#7141F8] data-[error=true]:text-[#F81404]",
+          className
+        )}
+      >
+        {label}
+      </Label>
       {icon && (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[#667085] pointer-events-none">
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[#667085]">
           {icon}
         </div>
       )}
       {error && (
-        <p className="mt-1.5 text-[12px] text-[#F81404]" role="alert">
+        <p
+          id={errorId}
+          className="mt-1.5 text-[12px] text-[#F81404]"
+          role="alert"
+        >
           {error}
         </p>
       )}
