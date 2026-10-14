@@ -31,7 +31,7 @@ export const resources: ResourceItem[] = [
     description:
       "How universities structure course discussions using Zedu to keep topics clear and accessible.",
     image: "/images/homepage/resources/image-1.png",
-    link: "#",
+    link: "/test-article",
   },
   {
     id: 2,
