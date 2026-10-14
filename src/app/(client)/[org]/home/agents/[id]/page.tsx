@@ -1242,6 +1242,7 @@ $result = $stmt->get_result();
               scrollContainerRef={scrollContainerRef}
               isAtBottom={!showScrollButton}
               onScrollToBottom={scrollToBottom}
+              scrollToTop={false}
             />
           </div>
         </div>
