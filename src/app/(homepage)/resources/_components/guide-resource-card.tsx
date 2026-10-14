@@ -46,13 +46,13 @@ export const GuideResourceCard = ({
         </div>
 
         {link === "#" ? (
-          <span className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-400 mt-3">
+          <span className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-500 mt-3">
             Coming soon
           </span>
         ) : (
           <Link
             href={link}
-            className="inline-flex items-center gap-2 text-sm font-bold text-primary-500 bg-primary-50 rounded-full px-4 py-1.5 hover:bg-primary-100 hover:text-primary-600 transition-colors mt-3 w-fit"
+            className="inline-flex items-center gap-2 text-sm font-bold text-primary-500 hover:text-primary-600 hover:underline underline-offset-4 transition-colors mt-3"
           >
             Read article
             <ArrowRight size={16} />
