@@ -46,7 +46,7 @@ export const GuideResourceCard = ({
         </div>
 
         {link === "#" ? (
-          <span className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-400 mt-3">
+          <span className="inline-flex items-center gap-2 text-sm font-semibold text-neutral-500 mt-3">
             Coming soon
           </span>
         ) : (
