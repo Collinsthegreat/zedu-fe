@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -13,6 +13,7 @@ import useFirstChannel from "../../home/channels/hooks/first-channel";
 import StepIndicator from "~/components/ui/step-indicator";
 import { RegisterWebhookRequest } from "~/utils/webhook-request";
 import { DataContext } from "~/store/GlobalState";
+import { provisionTemplateChannels } from "~/data/templates";
 
 // initial states
 const initialState = {
@@ -20,8 +21,10 @@ const initialState = {
   organisationType: "",
 };
 
+/** Onboarding view allowing newly registered users to create their initial organization. */
 const CreateOrganization: React.FC = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [buttonloading, setButtonloding] = useState(false);
   const [values, setValues] = useState(initialState);
   const [loading, setLoading] = useState(true);
@@ -83,10 +86,18 @@ const CreateOrganization: React.FC = () => {
       // onboard the user
       await PutRequest("/auth/onboard-status", {}, token);
 
-      localStorage.setItem("orgId", res?.data?.data?.id);
-      const channelId = await firstChannel(res?.data?.data?.id);
+      const newOrgId = res?.data?.data?.id;
+      localStorage.setItem("orgId", newOrgId);
+      await provisionTemplateChannels(
+        newOrgId,
+        searchParams.get("template"),
+        token
+      );
+      const channelId = await firstChannel(newOrgId);
 
-      window.location.href = `/${orgSlug}/home/channels/${channelId}`;
+      window.location.href = channelId
+        ? `/${orgSlug}/home/channels/${channelId}`
+        : `/${orgSlug}`;
 
       // send webhook
       const webhookData = `
