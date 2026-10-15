@@ -37,7 +37,7 @@ const UseHomeChannel = () => {
     }
   }, [
     orgId,
-    // state?.channelCallback,
+    state?.channelCallback,
     dispatch,
     state?.joinCallback,
     state?.leaveCallback,
@@ -63,7 +63,7 @@ const UseHomeChannel = () => {
 
       fetchAllChannels();
     }
-  }, [orgId, dispatch]);
+  }, [orgId, dispatch, state?.channelCallback]);
 
   useEffect(() => {
     if (orgId) {

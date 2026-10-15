@@ -10,6 +10,7 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
+  Lightbulb,
 } from "lucide-react";
 import CreateChannelDialog from "../../chat-nav/create-channel-dialog";
 import { DataContext } from "~/store/GlobalState";
@@ -20,10 +21,25 @@ import { Channel } from "~/types/channel";
 import { PostRequest } from "~/utils/new-request";
 import Loading from "~/components/ui/loading";
 
+/**
+ * Directories → Channels tab: lists the organisation's channels with search,
+ * filters and sorting, and lets the user open or join a channel.
+ */
 export default function ChannelsTab() {
+  const CHANNELS_TIP_DISMISSED_KEY = "channelsTipDismissed";
   const { state, dispatch } = useContext(DataContext);
   const { allChannels, channelloading, orgSlug } = state;
   const router = useRouter();
+
+  // The all-channels list can lag behind the user's own channel list, so
+  // treat a channel as joined if either source says the user is a member.
+  const joinedChannelIds = new Set(
+    (Array.isArray(state?.channels) ? state.channels : []).map(
+      (item: Channel) => item?.channels_id
+    )
+  );
+  const isJoined = (channel: Channel) =>
+    channel.access === true || joinedChannelIds.has(channel.channels_id);
 
   const [showBanner, setShowBanner] = useState(true);
   const [filter, setFilter] = useState("All channels");
@@ -31,6 +47,9 @@ export default function ChannelsTab() {
   const [sortOrder, setSortOrder] = useState("A to Z");
   const [searchInput, setSearchInput] = useState("");
   const [buttonLoading, setButtonloading] = useState(false);
+  // The tip stays hidden until we've checked whether it was dismissed, so it
+  // doesn't flash for returning users.
+  const [tipChecked, setTipChecked] = useState(false);
 
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const [showTypeMenu, setShowTypeMenu] = useState(false);
@@ -63,6 +82,27 @@ export default function ChannelsTab() {
     setCurrentPage(1);
   }, [searchInput, filter, channelType]);
 
+  useEffect(() => {
+    // localStorage can throw (e.g. blocked storage); fall back to showing the tip.
+    try {
+      setShowBanner(
+        localStorage.getItem(CHANNELS_TIP_DISMISSED_KEY) !== "true"
+      );
+    } catch {
+      setShowBanner(true);
+    }
+    setTipChecked(true);
+  }, []);
+
+  const dismissBanner = () => {
+    setShowBanner(false);
+    try {
+      localStorage.setItem(CHANNELS_TIP_DISMISSED_KEY, "true");
+    } catch {
+      // Storage unavailable: the tip is still hidden for this visit.
+    }
+  };
+
   if (channelloading) {
     return (
       <div className="border border-gray-200 rounded-lg divide-y divide-gray-100 m-6">
@@ -81,9 +121,8 @@ export default function ChannelsTab() {
   const processedData = filteredChannels
     ?.filter((channel: Channel) => {
       let matchesStatus = true;
-      if (filter === "My channels") matchesStatus = channel.access === true;
-      else if (filter === "Other channels")
-        matchesStatus = channel.access === false;
+      if (filter === "My channels") matchesStatus = isJoined(channel);
+      else if (filter === "Other channels") matchesStatus = !isJoined(channel);
       else if (filter === "Archived channels")
         matchesStatus = channel.isArchived === true;
 
@@ -141,7 +180,10 @@ export default function ChannelsTab() {
     const res = await PostRequest(`/channels/${id}/join`, {
       username: user?.username,
     });
-    if (res?.status === 200 || res?.status === 201) {
+    const alreadyMember = String(res?.response?.data?.message ?? "")
+      .toLowerCase()
+      .includes("already in channel");
+    if (res?.status === 200 || res?.status === 201 || alreadyMember) {
       router.push(`/${orgSlug}/home/channels/${id}`);
     } else {
       setButtonloading(false);
@@ -169,25 +211,26 @@ export default function ChannelsTab() {
         <CreateChannelDialog />
       </div>
 
-      {showBanner && (
-        <div className="relative bg-[#e8f5fa] dark:bg-[#1A3F66]/40 rounded-lg p-4 md:p-8 mb-6 border border-[#c5e5f3] dark:border-[#1A3F66]">
+      {tipChecked && showBanner && (
+        <div className="flex items-center gap-3 rounded-lg border border-[#c5e5f3] dark:border-[#1A3F66] bg-[#e8f5fa] dark:bg-[#1A3F66]/40 px-3 py-2 mb-4 text-[13px] text-[#454245] dark:text-zinc-300">
+          <Lightbulb
+            size={16}
+            aria-hidden="true"
+            className="shrink-0 text-[#1264a3] dark:text-sky-300"
+          />
+          <p className="flex-1">
+            <span className="font-bold text-[#1d1c1d] dark:text-zinc-100">
+              Channels
+            </span>{" "}
+            group people, messages and files by project or topic.
+          </p>
           <button
-            onClick={() => setShowBanner(false)}
-            className="absolute top-4 right-4 text-gray-500 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-100 transition-colors"
+            onClick={dismissBanner}
+            aria-label="Dismiss tip"
+            className="shrink-0 text-gray-500 dark:text-zinc-400 hover:text-black dark:hover:text-zinc-100 transition-colors"
           >
-            <X size={20} />
+            <X size={16} />
           </button>
-          <div className="max-w-2xl">
-            <h2 className="text-lg md:text-[28px] font-black leading-tight mb-3 text-[#1d1c1d] dark:text-zinc-100">
-              Organize your team’s conversations
-            </h2>
-            <p className="text-[15px] text-[#454245] dark:text-zinc-300 leading-relaxed mb-6">
-              Channels are spaces for gathering all the right people, messages,
-              files and tools. Organize them by any project, group, initiative
-              or topic of your choosing.
-            </p>
-            <CreateChannelDialog />
-          </div>
         </div>
       )}
 
@@ -307,7 +350,7 @@ export default function ChannelsTab() {
                     </span>
                   </div>
                   <div className="flex items-center gap-2 mt-1">
-                    {channel.access && (
+                    {isJoined(channel) && (
                       <span className="text-[13px] text-[#007a5a] dark:text-emerald-400 font-bold">
                         ✓ Joined
                       </span>
@@ -334,7 +377,7 @@ export default function ChannelsTab() {
                   >
                     Open in Home
                   </button>
-                  {!channel.access && !channel.isArchived && (
+                  {!isJoined(channel) && !channel.isArchived && (
                     <button
                       onClick={() => handleJoin(channel.channels_id)}
                       className="flex items-center gap-1 px-4 py-1.5 bg-white dark:bg-[#222529] border border-gray-300 dark:border-white/15 rounded font-bold text-[14px] text-[#1d1c1d] dark:text-zinc-100 hover:shadow-sm dark:hover:bg-white/5"
