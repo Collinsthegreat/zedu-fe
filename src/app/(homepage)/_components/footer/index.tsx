@@ -36,8 +36,26 @@ const solutionLinks: FooterLink[] = [
 ];
 
 const supportLinks: FooterLink[] = [
-  { id: 0, label: "Pricing", href: "/pricing" },
-  { id: 3, label: "Contact Us", href: "/contact-sales" },
+  {
+    id: 0,
+    label: "About Us",
+    href: "/about",
+  },
+  {
+    id: 1,
+    label: "Pricing",
+    href: "/pricing",
+  },
+  {
+    id: 2,
+    label: "Download",
+    href: "/download",
+  },
+  {
+    id: 3,
+    label: "Contact Us",
+    href: "/contact-sales",
+  },
 ];
 
 const resourcesLinks: FooterLink[] = [
