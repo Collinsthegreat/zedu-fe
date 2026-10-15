@@ -21,6 +21,7 @@ const initialState = {
   organisationType: "",
 };
 
+/** Onboarding view allowing newly registered users to create their initial organization. */
 const CreateOrganization: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -94,7 +95,9 @@ const CreateOrganization: React.FC = () => {
       );
       const channelId = await firstChannel(newOrgId);
 
-      window.location.href = `/${orgSlug}/home/channels/${channelId}`;
+      window.location.href = channelId
+        ? `/${orgSlug}/home/channels/${channelId}`
+        : `/${orgSlug}`;
 
       // send webhook
       const webhookData = `

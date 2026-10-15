@@ -15,6 +15,7 @@ import { Separator } from "~/components/ui/separator";
 import AppleSignin from "react-apple-signin-auth";
 import { Eye, EyeOff } from "lucide-react";
 
+/** User registration page supporting email/password, Google, Apple auth, and template onboarding. */
 function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

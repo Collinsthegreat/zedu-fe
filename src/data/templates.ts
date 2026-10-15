@@ -49,6 +49,7 @@ export const getTemplateBySlug = (slug: string) =>
       t.slug.replace(/-/g, "") === slug?.toLowerCase().replace(/[^a-z0-9]/g, "")
   );
 
+/** Reads a key safely from localStorage in browser environments. */
 const getStored = (k: string) =>
   typeof window !== "undefined" ? localStorage.getItem(k) : null;
 
@@ -57,10 +58,10 @@ export async function provisionTemplateChannels(
   orgId: string,
   slug?: string | null,
   token?: string
-) {
+): Promise<boolean> {
   const t =
     orgId && getTemplateBySlug(slug || getStored("selected_template") || "");
-  if (!t) return;
+  if (!t) return false;
   const auth = token || getStored("token") || "";
   const u = JSON.parse(getStored("user") || "{}");
   const Username = u?.username || u?.email;
@@ -70,9 +71,21 @@ export async function provisionTemplateChannels(
     is_private: false,
     Username,
   });
-  await Promise.allSettled(
+  const results = await Promise.all(
     t.channels.map((n) => PostRequest("/channels", payload(n), auth))
   );
-  if (typeof window !== "undefined")
-    localStorage.removeItem("selected_template");
+  const allSuccessful =
+    results.length > 0 &&
+    results.every(
+      (res: any) => res && (res.status === 200 || res.status === 201)
+    );
+
+  if (allSuccessful) {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("selected_template");
+    }
+    return true;
+  }
+
+  return false;
 }
