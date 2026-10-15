@@ -93,6 +93,9 @@ const FloatingLabelInput = React.forwardRef<
           ref={ref}
           id={inputId}
           type={type}
+          value={value}
+          defaultValue={defaultValue}
+          {...props}
           onChange={handleChange}
           onBlur={handleBlur}
           onFocus={handleFocus}
@@ -104,7 +107,6 @@ const FloatingLabelInput = React.forwardRef<
             icon && "pr-10",
             className
           )}
-          {...props}
           aria-invalid={isError ? true : props["aria-invalid"]}
           aria-errormessage={isError ? errorId : props["aria-errormessage"]}
         />
