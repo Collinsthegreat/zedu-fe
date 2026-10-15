@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Search } from "lucide-react";
 import { Input } from "~/components/ui/input";
 import { GuideResourceCard } from "./_components/guide-resource-card";
 import { WebinarResourceCard } from "./_components/webinar-resource-card";
 import { tabs, resources } from "../_lib/resources";
 import { DynamicFooter } from "../_components/footer/dynamic-footer";
+
+/** Resources directory page showcasing guides, webinars, and learning materials. */
 const ResourcesPage = () => {
   const [activeTab, setActiveTab] = useState("guides");
   const [searchQuery, setSearchQuery] = useState("");
@@ -49,25 +52,36 @@ const ResourcesPage = () => {
           </div>
         </div>
         <div className="w-full max-w-6xl overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:flex md:justify-center md:overflow-visible">
-          <div
-            role="tablist"
-            className="inline-flex w-max items-center gap-2 rounded-full bg-purple-100 p-2 md:gap-3"
-          >
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                role="tab"
-                aria-selected={activeTab === tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`shrink-0 rounded-full px-5 py-2 text-sm font-medium transition-colors md:px-6 ${
-                  activeTab === tab.id
-                    ? "bg-white text-primary-500 shadow-sm"
-                    : "text-neutral-600 hover:text-neutral-900"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+          <div className="inline-flex w-max items-center gap-2 rounded-full bg-purple-100 p-2 md:gap-3">
+            <div
+              role="tablist"
+              aria-label="Resource tabs"
+              className="inline-flex items-center gap-2 md:gap-3"
+            >
+              {tabs
+                .filter((tab) => tab.id !== "templates")
+                .map((tab) => (
+                  <button
+                    key={tab.id}
+                    role="tab"
+                    aria-selected={activeTab === tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`shrink-0 rounded-full px-5 py-2 text-sm font-medium transition-colors md:px-6 ${
+                      activeTab === tab.id
+                        ? "bg-white text-primary-500 shadow-sm"
+                        : "text-neutral-600 hover:text-neutral-900"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+            </div>
+            <Link
+              href="/templates"
+              className="shrink-0 rounded-full px-5 py-2 text-sm font-medium transition-colors md:px-6 text-neutral-600 hover:text-neutral-900"
+            >
+              Templates
+            </Link>
           </div>
         </div>
 
