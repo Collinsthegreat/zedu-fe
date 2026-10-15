@@ -852,6 +852,7 @@ const UseTextEditor = (
       attributes: {
         class:
           "outline-none focus:outline-none w-full min-w-0 max-w-full break-words",
+        spellcheck: "true",
       },
       handlePaste(view, event, slice) {
         const items = event.clipboardData?.items;

@@ -24,6 +24,7 @@ import UserAvatar from "~/components/layout/user-avatar";
 import { isUserDeactivated } from "~/utils/user-deactivation";
 import { useMessageHighlight } from "~/hooks/use-message-highlight";
 import { useMessageDeepLink } from "~/hooks/use-message-deep-link";
+import { ScrollToLatestButton } from "~/components/ui/scroll-to-latest-button";
 
 const PeopleMessage = ({ participant }: any) => {
   const { fetchMoreData, hasMore, loading } = UsePeopleMessage();
@@ -66,7 +67,7 @@ const PeopleMessage = ({ participant }: any) => {
     if (!container) return;
 
     const handleScroll = () => {
-      const isAtBottom = container.scrollTop >= 0;
+      const isAtBottom = container.scrollTop >= -1;
 
       if (isAtBottom) {
         getData();
@@ -136,7 +137,7 @@ const PeopleMessage = ({ participant }: any) => {
         flexDirection: "column-reverse",
         paddingBottom: "var(--chat-composer-height, 140px)",
       }}
-      className="w-full"
+      className="w-full relative"
     >
       {showBadge && state?.dmCount > 0 && (
         <Badge
@@ -152,6 +153,12 @@ const PeopleMessage = ({ participant }: any) => {
           Latest messages
         </Badge>
       )}
+
+      <ScrollToLatestButton
+        scrollContainerRef={scrollableContainerRef}
+        isAtBottom={!showBadge}
+        onScrollToBottom={getData}
+      />
 
       <InfiniteScroll
         dataLength={chats?.length}
