@@ -7,11 +7,18 @@ export function ensureCentrifugeConnected(force = false): void {
   try {
     const client = getSharedCentrifuge();
     const state = client.state;
+
     if (force) {
-      if (state !== "connected") {
-        client.connect();
+      if (state === "connected") return;
+      // connect() is a no-op while connecting; restart so wake/push skip backoff.
+      if (state === "connecting") {
+        client.disconnect();
       }
-    } else if (state !== "connected" && state !== "connecting") {
+      client.connect();
+      return;
+    }
+
+    if (state !== "connected" && state !== "connecting") {
       client.connect();
     }
   } catch {

@@ -15,6 +15,16 @@ export function showCallNotification(params: {
   }
 
   try {
+    const key = params.buzzId || "default";
+    const previous = activeNotifications.get(key);
+    if (previous) {
+      try {
+        previous.close();
+      } catch {
+        // Ignore close errors
+      }
+    }
+
     const notif = new Notification(`${params.callerName} is buzzing you!`, {
       body: "Click to join the buzz",
       icon: typeof params.avatarUrl === "string" ? params.avatarUrl : undefined,
@@ -22,17 +32,20 @@ export function showCallNotification(params: {
       requireInteraction: true,
     });
 
-    const key = params.buzzId || "default";
     activeNotifications.set(key, notif);
 
     notif.onclick = () => {
       window.focus();
       notif.close();
-      activeNotifications.delete(key);
+      if (activeNotifications.get(key) === notif) {
+        activeNotifications.delete(key);
+      }
     };
 
     notif.onclose = () => {
-      activeNotifications.delete(key);
+      if (activeNotifications.get(key) === notif) {
+        activeNotifications.delete(key);
+      }
     };
   } catch {
     // Ignore browser notification errors
@@ -40,7 +53,9 @@ export function showCallNotification(params: {
 }
 
 export function closeCallNotification(buzzId?: string): void {
-  if (buzzId && activeNotifications.has(buzzId)) {
+  // A supplied ID (including empty/unknown) must not fall through to bulk close.
+  if (arguments.length >= 1) {
+    if (!buzzId || !activeNotifications.has(buzzId)) return;
     try {
       activeNotifications.get(buzzId)?.close();
     } catch {
