@@ -242,7 +242,7 @@ const FirstMessageBox = ({ sendMessage }: any) => {
         className={`bg-white border rounded-xl mx-3 md:mx-5 border-[#E6EAEF] overflow-hidden max-w-full`}
       >
         {showFormatting && (
-          <div className="border-b border-[#E6EAEF] flex items-center gap-2 bg-[#F9FAFB] pl-3 pr-4 py-[5px]">
+          <div className="border-b border-[#E6EAEF] flex items-center gap-2 bg-[#F9FAFB] pl-3 pr-4 py-[5px] overflow-x-auto">
             <button
               onClick={() => editor?.chain().focus().toggleBold().run()}
               className={`p-1.5 hover:bg-gray-100 rounded ${
@@ -383,14 +383,16 @@ const FirstMessageBox = ({ sendMessage }: any) => {
           </div>
         )}
 
-        <div className="md:flex-1 relative px-3 min-w-0 max-w-full overflow-hidden">
+        <div className="md:flex-1 relative px-3 min-w-0 max-w-full">
           <EditorContent
             editor={editor}
             className="py-2 rounded-md w-full min-w-0 max-w-full overflow-y-auto overflow-x-hidden"
             onKeyDown={handleKeyDown}
           />
 
-          <div className={`flex gap-3 ${media?.length > 0 ? "mt-3" : ""}`}>
+          <div
+            className={`flex gap-3 overflow-x-auto ${media?.length > 0 ? "mt-3" : ""}`}
+          >
             {media?.map((file: any, index: number) => (
               <div key={index} className="relative w-[70px] h-[70px]">
                 {file.type === "image" ? (

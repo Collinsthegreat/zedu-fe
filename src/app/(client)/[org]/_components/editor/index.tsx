@@ -139,13 +139,19 @@ function positionDropdown(
 
   const itemHeight = 48;
   const maxHeight = 300;
-  const dropdownHeight = Math.min(itemCount * itemHeight, maxHeight);
-
-  const editorTop = coords.top + window.scrollY;
-  const isAbove = editorTop > dropdownHeight + itemHeight;
+  const gap = 8;
+  const spaceAbove = coords.top;
+  const spaceBelow = window.innerHeight - coords.bottom;
+  const isAbove = spaceAbove > spaceBelow;
+  const availableSpace = Math.max(
+    itemHeight,
+    (isAbove ? spaceAbove : spaceBelow) - gap
+  );
+  const constrainedMaxHeight = Math.min(maxHeight, availableSpace);
+  const dropdownHeight = Math.min(itemCount * itemHeight, constrainedMaxHeight);
   const dropdownTop = isAbove
-    ? Math.max(window.scrollY + 8, editorTop - dropdownHeight - 8)
-    : coords.bottom + window.scrollY + 8;
+    ? coords.top + window.scrollY - dropdownHeight - gap
+    : coords.bottom + window.scrollY + gap;
 
   let dropdownLeft: number;
   if (isMobile) {
@@ -166,7 +172,7 @@ function positionDropdown(
   Object.assign(component.style, {
     top: `${dropdownTop}px`,
     left: `${dropdownLeft}px`,
-    maxHeight: `${maxHeight}px`,
+    maxHeight: `${constrainedMaxHeight}px`,
     width: `${targetWidth}px`,
     maxWidth: "calc(100vw - 24px)",
     minWidth: "0px",
