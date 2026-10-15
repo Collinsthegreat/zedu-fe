@@ -129,7 +129,7 @@ const ChannelsMessage = () => {
         flexDirection: "column-reverse",
         paddingBottom: "var(--chat-composer-height, 140px)",
       }}
-      className="w-full"
+      className="w-full min-w-0"
     >
       {showBadge && state?.threadCount > 0 && (
         <Badge
