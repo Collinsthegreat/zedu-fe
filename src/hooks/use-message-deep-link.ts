@@ -19,11 +19,13 @@ export function useMessageDeepLink({
   const appliedRef = useRef<string | null>(null);
   const threadRef = useRef(state?.thread);
   const loadThreadRef = useRef(state?.loadThread);
+  const repliesRef = useRef(state?.replies);
 
   useEffect(() => {
     threadRef.current = state?.thread;
     loadThreadRef.current = state?.loadThread;
-  }, [state?.thread, state?.loadThread]);
+    repliesRef.current = state?.replies;
+  }, [state?.thread, state?.loadThread, state?.replies]);
 
   const threadId = searchParams.get("thread_id");
   const messageId = searchParams.get("message_id");
@@ -49,8 +51,11 @@ export function useMessageDeepLink({
         (!threadRef.current?.message ||
           threadRef.current?.username === "Thread")
       ) {
+        // Restore parent metadata only; page-1 REPLIES would wipe fetched replies.
         dispatch({ type: ACTIONS.THREAD, payload: parentThread });
+        const existingReplies = repliesRef.current || [];
         if (
+          existingReplies.length === 0 &&
           Array.isArray(parentThread.preview_reply) &&
           parentThread.preview_reply.length > 0
         ) {
