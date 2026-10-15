@@ -8,12 +8,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Checkbox } from "~/components/ui/checkbox";
 import Loading from "~/components/ui/loading";
 import { PostRequest } from "~/utils/request";
+import { provisionTemplateChannels } from "~/data/templates";
 import { useGoogleLogin } from "@react-oauth/google";
 import { RegisterWebhookRequest } from "~/utils/webhook-request";
 import { Separator } from "~/components/ui/separator";
 import AppleSignin from "react-apple-signin-auth";
 import { Eye, EyeOff } from "lucide-react";
 
+/** User registration page supporting email/password, Google, Apple auth, and template onboarding. */
 function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,6 +34,15 @@ function SignUp() {
   const [loading, setLoading] = useState(false);
   const [googleloading, setGoogleloading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
+  const tmpl =
+    searchParams.get("template") ||
+    (typeof window !== "undefined"
+      ? localStorage.getItem("selected_template")
+      : null);
+  const toWelcome = (slug: string) =>
+    `/${slug}/welcome${tmpl ? `?template=${tmpl}` : ""}`;
+  const provisionIfTemplate = (orgId?: string, token?: string) =>
+    tmpl && orgId && provisionTemplateChannels(orgId, tmpl, token);
   // Apple Login handler
   const handleAppleSuccess = async (response: any) => {
     setAppleLoading(true);
@@ -50,13 +61,18 @@ function SignUp() {
         if (orgSlug) {
           localStorage.setItem("orgSlug", orgSlug);
         }
+        await provisionIfTemplate(
+          user?.current_org,
+          res?.data?.data?.access_token
+        );
+
         if (redirectUrl) {
           router.push(redirectUrl);
         } else {
           if (user?.is_onboarded) {
             router.push(`/${orgSlug}`);
           } else {
-            router.push(`/${orgSlug}/welcome`);
+            router.push(toWelcome(orgSlug));
           }
         }
         const message = `\nName: ${user?.username}\\nEmail: ${user?.email}`;
@@ -89,6 +105,10 @@ function SignUp() {
     const inviteEmail = searchParams.get("email");
     if (inviteEmail) {
       setEmail(inviteEmail.trim());
+    }
+    const template = searchParams.get("template");
+    if (template) {
+      localStorage.setItem("selected_template", template);
     }
   }, [searchParams]);
 
@@ -183,6 +203,11 @@ function SignUp() {
           localStorage.setItem("orgSlug", orgSlug);
         }
 
+        await provisionIfTemplate(
+          res?.data?.data?.user?.current_org,
+          res?.data?.data?.access_token
+        );
+
         if (redirectUrl) {
           setTimeout(() => {
             router.push(redirectUrl);
@@ -192,7 +217,7 @@ function SignUp() {
             if (res?.data?.data?.user?.is_onboarded) {
               router.push(`/${orgSlug}`);
             } else {
-              router.push(`/${orgSlug}/welcome`);
+              router.push(toWelcome(orgSlug));
             }
           }, 100);
         }
@@ -241,13 +266,18 @@ function SignUp() {
             localStorage.setItem("orgSlug", orgSlug);
           }
 
+          await provisionIfTemplate(
+            user?.current_org,
+            res?.data?.data?.access_token
+          );
+
           if (redirectUrl) {
             router.push(redirectUrl);
           } else {
             if (user?.is_onboarded) {
               router.push(`/${orgSlug}`);
             } else {
-              router.push(`${orgSlug}/welcome`);
+              router.push(toWelcome(orgSlug));
             }
           }
 

@@ -1,12 +1,16 @@
+import { WhyFeatureCard } from "../ui/WhyFeatureCard";
 import { WhyCard } from "../ui/WhyCard";
 import { ArrowBtn } from "../ui/Button";
 import { otherReasons, whyCardsData } from "../../_lib";
 import Image from "next/image";
+import { GraduationCap, Users } from "lucide-react";
+
+const whyCardIcons = [GraduationCap, Users];
 
 export const WhySection = () => {
   return (
     <>
-      <section className="relative isolate flex w-full flex-col items-center gap-6 overflow-hidden px-4 py-12 text-center sm:gap-6 sm:px-8 sm:py-16   lg:gap-8 lg:px-12">
+      <section className="relative isolate flex w-full flex-col items-center gap-8 overflow-hidden bg-primary-50 px-4 py-12 text-center sm:gap-10 sm:px-8 sm:py-16 lg:gap-12 lg:px-12 lg:py-20">
         <div className="flex flex-col gap-3 items-center">
           <h1 className=" text-2xl font-semibold leading-tight text-neutral-900 sm:text-3xl md:text-4xl text-center">
             Why Educators Choose Zedu
@@ -17,9 +21,14 @@ export const WhySection = () => {
           </p>
         </div>
 
-        <div className="grid w-full max-w-7xl grid-cols-1 place-items-center gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid w-full max-w-7xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
           {whyCardsData.map((card, index) => (
-            <WhyCard key={index} title={card.title} desc={card.desc} />
+            <WhyFeatureCard
+              key={card.title}
+              title={card.title}
+              desc={card.desc}
+              icon={whyCardIcons[index]}
+            />
           ))}
         </div>
       </section>
