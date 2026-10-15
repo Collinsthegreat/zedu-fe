@@ -63,7 +63,12 @@ export async function provisionTemplateChannels(
     orgId && getTemplateBySlug(slug || getStored("selected_template") || "");
   if (!t) return false;
   const auth = token || getStored("token") || "";
-  const u = JSON.parse(getStored("user") || "{}");
+  let u: any = {};
+  try {
+    u = JSON.parse(getStored("user") || "{}");
+  } catch {
+    u = {};
+  }
   const Username = u?.username || u?.email;
   const payload = (n: string) => ({
     name: n.replace(/^#/, ""),

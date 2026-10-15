@@ -68,7 +68,11 @@ export default function RootLayout({
           !provisionedRef.current
         ) {
           provisionedRef.current = true;
-          await provisionTemplateChannels(orgId, t, token);
+          try {
+            await provisionTemplateChannels(orgId, t, token);
+          } catch {
+            // continue to redirect even if provisioning fails
+          }
         }
         const r = getLoggedInRedirectPath(orgSlug, t);
         if (r) return router.replace(r);
