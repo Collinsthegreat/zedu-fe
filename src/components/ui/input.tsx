@@ -63,6 +63,7 @@ const FloatingLabelInput = React.forwardRef<
     const initialValue = value ?? defaultValue ?? "";
     const [isFocused, setIsFocused] = React.useState(false);
     const [hasValue, setHasValue] = React.useState(!!initialValue);
+    const inputRef = React.useRef<HTMLInputElement>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setHasValue(!!e.target.value);
@@ -85,12 +86,40 @@ const FloatingLabelInput = React.forwardRef<
       setHasValue(!!val);
     }, [value, defaultValue]);
 
+    // Detect browser autofill on mount (browsers set value asynchronously)
+    React.useEffect(() => {
+      const input = inputRef.current;
+      if (!input) return;
+
+      const checkAutofill = () => {
+        if (input.value && !hasValue) {
+          setHasValue(true);
+        }
+      };
+
+      // Check immediately and then poll for a short window
+      checkAutofill();
+      const interval = setInterval(checkAutofill, 100);
+      const timeout = setTimeout(() => clearInterval(interval), 3000);
+
+      return () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+      };
+    }, [hasValue]);
+
     const isFloating = isFocused || hasValue;
 
     return (
       <div className="relative w-full">
         <input
-          ref={ref}
+          ref={(el) => {
+            inputRef.current = el;
+            if (ref) {
+              if (typeof ref === "function") ref(el);
+              else ref.current = el;
+            }
+          }}
           id={inputId}
           type={type}
           value={value}
@@ -101,7 +130,7 @@ const FloatingLabelInput = React.forwardRef<
           onFocus={handleFocus}
           placeholder=" "
           className={cn(
-            "peer flex h-10 w-full rounded-md border border-[#D0D0FD] bg-background px-4 py-2 text-[14px] text-[#667085] placeholder:text-transparent focus:outline-none focus:ring-1 focus:ring-[#7141F8] focus:border-[#7141F8] disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-150",
+            "peer flex h-10 w-full rounded-md border border-[#D0D0FD] bg-background px-4 py-2 text-[14px] text-[#667085] placeholder:text-transparent focus:outline-none focus:ring-1 focus:ring-[#7141F8] focus:border-[#7141F8] disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-150 [-webkit-text-fill-color:#667085] [transition:background-color_9999s,color_9999s]",
             isError &&
               "border-[#F81404] focus:ring-[#F81404] focus:border-[#F81404]",
             icon && "pr-10",
