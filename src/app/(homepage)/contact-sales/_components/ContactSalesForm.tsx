@@ -6,6 +6,13 @@ import { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 import { Textarea } from "~/components/ui/textarea";
 import { useToast } from "~/components/ui/use-toast";
 import { cn } from "~/lib/utils";
@@ -38,6 +45,10 @@ const contactSalesSchema = z.object({
       const digits = getPhoneDigits(value);
       return digits.length >= 10 && digits.length <= 15;
     }, "Phone number must contain between 10 and 15 digits"),
+  organization_type: z
+    .string()
+    .trim()
+    .min(1, "Please select an organization type"),
   message: z
     .string()
     .trim()
@@ -53,6 +64,7 @@ const initialFormData: ContactSalesFormData = {
   name: "",
   email: "",
   phone: "",
+  organization_type: "",
   message: "",
 };
 
@@ -122,11 +134,17 @@ export const ContactSalesForm = () => {
     setSending(true);
 
     const normalizedPhone = getPhoneDigits(formData.phone);
+    const orgType = formData.organization_type.trim();
+    const rawMessage = formData.message.trim();
+    const formattedMessage = orgType
+      ? `Organization type: ${orgType}\n\n${rawMessage}`
+      : rawMessage;
     const contactData = {
       name: formData.name.trim(),
       email: formData.email.trim(),
       phone_number: normalizedPhone,
-      message: formData.message.trim(),
+      organization_type: orgType,
+      message: formattedMessage,
     };
 
     try {
@@ -205,7 +223,7 @@ export const ContactSalesForm = () => {
           ) : null}
         </div>
 
-        <div className="sm:col-span-2 flex flex-col gap-1.5 lg:gap-4">
+        <div className="flex flex-col gap-1.5 lg:gap-4">
           <Label htmlFor="phone" className="text-sm font-medium text-[#222]">
             Phone Number
           </Label>
@@ -224,6 +242,52 @@ export const ContactSalesForm = () => {
           />
           {errors.phone ? (
             <p className="text-xs text-red-500">{errors.phone}</p>
+          ) : null}
+        </div>
+
+        <div className="flex flex-col gap-1.5 lg:gap-4">
+          <Label
+            htmlFor="organization_type"
+            className="text-sm font-medium text-[#222]"
+          >
+            Organization Type
+          </Label>
+          <Select
+            value={formData.organization_type}
+            onValueChange={(value) => updateField("organization_type", value)}
+          >
+            <SelectTrigger
+              id="organization_type"
+              aria-required="true"
+              aria-invalid={Boolean(errors.organization_type)}
+              aria-errormessage={
+                errors.organization_type ? "organization_type-error" : undefined
+              }
+              aria-describedby={
+                errors.organization_type ? "organization_type-error" : undefined
+              }
+              className={cn(
+                "h-10 border-[#d9d9df] p-3 text-sm text-[#222] focus:ring-1 focus:ring-primary-500",
+                errors.organization_type && "border-red-500"
+              )}
+            >
+              <SelectValue placeholder="Select organization type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Bootcamp">Bootcamp</SelectItem>
+              <SelectItem value="University / Higher Ed">
+                University / Higher Ed
+              </SelectItem>
+              <SelectItem value="K-12 School">K-12 School</SelectItem>
+              <SelectItem value="Online Learning Platform / Other">
+                Online Learning Platform / Other
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.organization_type ? (
+            <p id="organization_type-error" className="text-xs text-red-500">
+              {errors.organization_type}
+            </p>
           ) : null}
         </div>
       </div>
