@@ -20,6 +20,8 @@ interface LeaveChannelDialogProps {
   /** Leave undefined when privacy isn't known yet; a neutral message is shown. */
   isPrivate?: boolean;
   loading?: boolean;
+  /** Disables "Leave channel" until the details belong to the channel being left. */
+  confirmDisabled?: boolean;
   onConfirm: () => void;
 }
 
@@ -29,6 +31,7 @@ export const LeaveChannelDialog = ({
   channelName,
   isPrivate,
   loading,
+  confirmDisabled,
   onConfirm,
 }: LeaveChannelDialogProps) => {
   const name = channelName ? `#${channelName}` : "this channel";
@@ -40,7 +43,15 @@ export const LeaveChannelDialog = ({
         : "You'll stop receiving messages from this channel. If it's private, you'll need to be invited again to rejoin.";
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        // Keep the dialog open while the leave request is in flight;
+        // the caller closes it after success.
+        if (!next && loading) return;
+        onOpenChange(next);
+      }}
+    >
       <DialogContent
         onClick={(e) => e.stopPropagation()}
         className="p-0 gap-0 bg-background dark:bg-[#222529]"
@@ -68,7 +79,11 @@ export const LeaveChannelDialog = ({
               Cancel
             </Button>
           </DialogClose>
-          <Button onClick={onConfirm} disabled={loading} variant="destructive">
+          <Button
+            onClick={onConfirm}
+            disabled={loading || confirmDisabled}
+            variant="destructive"
+          >
             Leave channel {loading && <Loading />}
           </Button>
         </DialogFooter>

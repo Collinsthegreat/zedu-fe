@@ -35,6 +35,10 @@ export function AboutTabContainer({ setIsOpen }: any) {
   const id = params.id as string;
   const { state, dispatch } = useContext(DataContext);
   const { channelDetails } = state;
+  // channelDetails can still hold the previous channel while the new one loads,
+  // so only use it when it belongs to the channel in the URL.
+  const detailsMatch =
+    String(channelDetails?.channels_id || "") === String(id || "");
 
   const handleLeave = async () => {
     setButtonLoading(true);
@@ -116,9 +120,10 @@ export function AboutTabContainer({ setIsOpen }: any) {
       <LeaveChannelDialog
         open={leaveOpen}
         onOpenChange={setLeaveOpen}
-        channelName={channelDetails?.name}
-        isPrivate={channelDetails?.is_private}
+        channelName={detailsMatch ? channelDetails?.name : undefined}
+        isPrivate={detailsMatch ? channelDetails?.is_private : undefined}
         loading={buttonLoading}
+        confirmDisabled={!detailsMatch}
         onConfirm={handleLeave}
       />
     </div>
