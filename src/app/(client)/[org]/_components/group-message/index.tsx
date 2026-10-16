@@ -22,6 +22,7 @@ import { useMessageHighlight } from "~/hooks/use-message-highlight";
 import { useMessageDeepLink } from "~/hooks/use-message-deep-link";
 import { ACTIONS } from "~/store/Actions";
 import EditMessageBox from "../message-box/edit";
+import { ScrollToLatestButton } from "~/components/ui/scroll-to-latest-button";
 
 const GroupMessage = ({ participants }: any) => {
   const { fetchMoreData, hasMore, loading } = UsePeopleMessage();
@@ -64,7 +65,7 @@ const GroupMessage = ({ participants }: any) => {
     if (!container) return;
 
     const handleScroll = () => {
-      const isAtBottom = container.scrollTop >= 0;
+      const isAtBottom = container.scrollTop >= -1;
 
       if (isAtBottom) {
         getData();
@@ -134,7 +135,7 @@ const GroupMessage = ({ participants }: any) => {
         flexDirection: "column-reverse",
         paddingBottom: "var(--chat-composer-height, 140px)",
       }}
-      className="w-full"
+      className="w-full relative"
     >
       {showBadge && state?.dmCount > 0 && (
         <Badge
@@ -150,6 +151,12 @@ const GroupMessage = ({ participants }: any) => {
           Latest messages
         </Badge>
       )}
+
+      <ScrollToLatestButton
+        scrollContainerRef={scrollableContainerRef}
+        isAtBottom={!showBadge}
+        onScrollToBottom={getData}
+      />
 
       <InfiniteScroll
         dataLength={chats?.length}
