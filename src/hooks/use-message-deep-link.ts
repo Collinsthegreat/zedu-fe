@@ -4,11 +4,18 @@ import { DataContext } from "~/store/GlobalState";
 import { ACTIONS } from "~/store/Actions";
 import { setMessageHighlight } from "~/utils/message-highlight";
 
+/** Options for the useMessageDeepLink hook. */
 interface UseMessageDeepLinkOptions {
   messages: Array<{ thread_id?: string; [key: string]: any }>;
   loading?: boolean;
 }
 
+/**
+ * Handles deep linking into a message or thread drawer from URL query parameters.
+ * Automatically highlights the target message and opens the thread drawer,
+ * creating a fallback placeholder if parent message data is still loading
+ * and restoring parent metadata and replies once available.
+ */
 export function useMessageDeepLink({
   messages,
   loading = false,
@@ -55,18 +62,42 @@ export function useMessageDeepLink({
         dispatch({ type: ACTIONS.THREAD, payload: parentThread });
         const existingReplies = repliesRef.current || [];
         if (
-          existingReplies.length === 0 &&
           Array.isArray(parentThread.preview_reply) &&
           parentThread.preview_reply.length > 0
         ) {
-          dispatch({
-            type: ACTIONS.REPLIES,
-            payload: {
-              newThreads: parentThread.preview_reply,
-              newPage: 1,
-              parentReactions: parentThread.reactions,
-            },
-          });
+          if (existingReplies.length === 0) {
+            dispatch({
+              type: ACTIONS.REPLIES,
+              payload: {
+                newThreads: parentThread.preview_reply,
+                newPage: 1,
+                parentReactions: parentThread.reactions,
+              },
+            });
+          } else {
+            // Merge preview replies by reply ID without replacing already-fetched replies
+            const existingIds = new Set(
+              existingReplies.map((r: any) =>
+                String(r?.id ?? r?.thread_id ?? r?._id ?? "")
+              )
+            );
+            const missingPreviews = parentThread.preview_reply.filter(
+              (r: any) => {
+                const id = String(r?.id ?? r?.thread_id ?? r?._id ?? "");
+                return id && !existingIds.has(id);
+              }
+            );
+            if (missingPreviews.length > 0) {
+              dispatch({
+                type: ACTIONS.REPLIES,
+                payload: {
+                  newThreads: missingPreviews,
+                  newPage: 2,
+                  parentReactions: parentThread.reactions,
+                },
+              });
+            }
+          }
         }
       }
       return;
