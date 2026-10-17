@@ -99,7 +99,12 @@ function saveMessageDraft(key: string, html: string, empty: boolean) {
   } else {
     drafts[key] = html;
   }
-  localStorage.setItem(MESSAGE_DRAFTS_KEY, JSON.stringify(drafts));
+  // Best-effort: a full or blocked localStorage must never stop a send.
+  try {
+    localStorage.setItem(MESSAGE_DRAFTS_KEY, JSON.stringify(drafts));
+  } catch {
+    // ignore
+  }
 }
 
 function loadMessageDraft(key: string) {
