@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { ogImageUrl, siteUrl } from "~/lib/env-urls";
 import Image from "next/image";
-import { ArrowBtn, OutlineBtn } from "../../_components/ui/Button";
+import { ArrowBtn } from "../../_components/ui/Button";
 import {
   FilesIcon,
   MessagesQuestionIcon,
@@ -13,7 +13,7 @@ import { DynamicFooter } from "../../_components/footer/dynamic-footer";
 import type { HomeFAQ } from "../../_lib/faqData";
 
 export const metadata: Metadata = {
-  title: "Channels",
+  title: "Zedu Channels - Organized Communication for Learning Teams",
   description:
     "Explore Zedu Channels for structured classroom and cohort communication. Organize discussions by subject, share updates clearly, and scale collaboration across learning teams.",
   keywords: [
@@ -159,7 +159,6 @@ const ChannelProductPage = () => {
             </p>
             <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-start">
               <ArrowBtn text="Start using channels" linkToHome />
-              <OutlineBtn text="Watch a Demo" />
             </div>
           </div>
 
