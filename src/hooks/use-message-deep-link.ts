@@ -51,8 +51,15 @@ export function useMessageDeepLink({
         String(message?.id || "") === String(threadId)
     );
 
+    const hasReplies =
+      (Array.isArray(parentThread?.preview_reply) &&
+        parentThread.preview_reply.length > 0) ||
+      Boolean(parentThread?.replies_count && parentThread.replies_count > 0);
+    const shouldOpenDrawer = Boolean(messageId) || hasReplies;
+
     if (appliedRef.current === signature) {
       if (
+        shouldOpenDrawer &&
         parentThread &&
         String(threadRef.current?.thread_id || "") === String(threadId) &&
         (!threadRef.current?.message ||
@@ -109,44 +116,54 @@ export function useMessageDeepLink({
     dispatch({ type: ACTIONS.DATA_ID, payload: highlightId });
 
     if (parentThread) {
-      dispatch({ type: ACTIONS.THREAD, payload: parentThread });
-      dispatch({
-        type: ACTIONS.REPLIES,
-        payload: {
-          newThreads: parentThread.preview_reply || [],
-          newPage: 1,
-          parentReactions: parentThread.reactions,
-        },
-      });
-      dispatch({ type: ACTIONS.REPLY, payload: true });
-      dispatch({ type: ACTIONS.LOAD_THREAD, payload: !loadThreadRef.current });
+      if (shouldOpenDrawer) {
+        dispatch({ type: ACTIONS.THREAD, payload: parentThread });
+        dispatch({
+          type: ACTIONS.REPLIES,
+          payload: {
+            newThreads: parentThread.preview_reply || [],
+            newPage: 1,
+            parentReactions: parentThread.reactions,
+          },
+        });
+        dispatch({ type: ACTIONS.REPLY, payload: true });
+        dispatch({
+          type: ACTIONS.LOAD_THREAD,
+          payload: !loadThreadRef.current,
+        });
+      }
       appliedRef.current = signature;
       return;
     }
 
     if (!loading) {
-      const fallbackThread = {
-        thread_id: threadId,
-        channels_id: channelId,
-        message: "",
-        username: "Thread",
-        created_at: new Date().toISOString(),
-        reactions: [],
-        preview_reply: [],
-        type: "message",
-      };
+      if (Boolean(messageId)) {
+        const fallbackThread = {
+          thread_id: threadId,
+          channels_id: channelId,
+          message: "",
+          username: "Thread",
+          created_at: new Date().toISOString(),
+          reactions: [],
+          preview_reply: [],
+          type: "message",
+        };
 
-      dispatch({ type: ACTIONS.THREAD, payload: fallbackThread });
-      dispatch({
-        type: ACTIONS.REPLIES,
-        payload: {
-          newThreads: [],
-          newPage: 1,
-          parentReactions: [],
-        },
-      });
-      dispatch({ type: ACTIONS.REPLY, payload: true });
-      dispatch({ type: ACTIONS.LOAD_THREAD, payload: !loadThreadRef.current });
+        dispatch({ type: ACTIONS.THREAD, payload: fallbackThread });
+        dispatch({
+          type: ACTIONS.REPLIES,
+          payload: {
+            newThreads: [],
+            newPage: 1,
+            parentReactions: [],
+          },
+        });
+        dispatch({ type: ACTIONS.REPLY, payload: true });
+        dispatch({
+          type: ACTIONS.LOAD_THREAD,
+          payload: !loadThreadRef.current,
+        });
+      }
       appliedRef.current = signature;
     }
   }, [channelId, threadId, messageId, messages, loading, dispatch]);

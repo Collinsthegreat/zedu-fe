@@ -1109,7 +1109,7 @@ $result = $stmt->get_result();
         <div className="flex-1 flex flex-col justify-end relative overflow-hidden">
           <div
             ref={scrollContainerRef}
-            className="overflow-y-auto pb-5 mb-[180px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] relative"
+            className="overflow-y-auto pb-5 mb-[180px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
           >
             {/* Empty intro section for users that are selected */}
             {/* Messages section */}
@@ -1237,14 +1237,14 @@ $result = $stmt->get_result();
               })}
               <div ref={messagesEndRef} />
             </div>
-
-            <ScrollToLatestButton
-              scrollContainerRef={scrollContainerRef}
-              isAtBottom={!showScrollButton}
-              onScrollToBottom={scrollToBottom}
-              scrollToTop={false}
-            />
           </div>
+
+          <ScrollToLatestButton
+            scrollContainerRef={scrollContainerRef}
+            isAtBottom={!showScrollButton}
+            scrollToTop={false}
+            className="bottom-[196px] right-6"
+          />
         </div>
       </div>
     </div>
