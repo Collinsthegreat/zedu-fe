@@ -420,8 +420,8 @@ function Login() {
                 </div>
               </div>
             </div>
-            <div className="mt-[10px] flex justify-between mb-[32px]">
-              <div className="flex flex-row gap-[4px] items-center">
+            <div className="mt-[10px] mb-[32px] flex w-full items-center justify-between">
+              <div className="flex items-center gap-[4px]">
                 <Checkbox />
                 <p className="text-[14px] font-[500] leading-[17.64px]">
                   Remember me
