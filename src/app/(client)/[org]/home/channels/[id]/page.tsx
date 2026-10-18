@@ -180,7 +180,7 @@ const ChannelsPage = () => {
       {/* MAIN CONTENT */}
       <div
         className={cn(
-          "relative flex flex-col flex-1 transition-[margin]",
+          "relative flex min-w-0 flex-col flex-1 transition-[margin]",
           CONVERSATION_SEARCH_PANEL_TRANSITION
         )}
         style={{ marginRight: `${totalSidePanelWidth}px` }}

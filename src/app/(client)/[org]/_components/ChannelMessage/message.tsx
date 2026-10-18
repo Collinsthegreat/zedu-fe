@@ -219,7 +219,7 @@ const Message = ({
       className={`relative group message-row py-1 transition-colors flex items-start px-5 gap-2`}
       onClick={handleMessageClick}
     >
-      <div className="flex items-center justify-center">
+      <div className="flex shrink-0 items-center justify-center">
         {shouldShowAvatar ? (
           <>
             <div className="relative inline-flex">
@@ -247,7 +247,7 @@ const Message = ({
         )}
       </div>
 
-      <div className="w-full">
+      <div className="min-w-0 flex-1">
         {shouldShowAvatar && (
           <div className="flex items-center gap-2">
             <span
@@ -267,9 +267,11 @@ const Message = ({
           </div>
         )}
 
-        <div className="relative flex items-start justify-between">
-          <div className="flex items-start gap-2">
-            <MessageItem item={item} />
+        <div className="relative flex min-w-0 items-start justify-between">
+          <div className="flex min-w-0 flex-1 items-start gap-2">
+            <div className="min-w-0 flex-1">
+              <MessageItem item={item} />
+            </div>
 
             <div className="text-[9px] text-neutral-500 mt-[2px]">
               {(item.user_type === "user" || item.user_type === "") &&

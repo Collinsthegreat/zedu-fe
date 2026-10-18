@@ -4,7 +4,11 @@ import { useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
 import { DataContext, DataProvider } from "~/store/GlobalState";
 
-function getLoggedInRedirectPath(orgSlugFromState?: string) {
+/** Resolves the logged-in destination path, preserving template query param for un-onboarded users. */
+function getLoggedInRedirectPath(
+  orgSlugFromState?: string,
+  template?: string | null
+) {
   const storedOrgSlug = localStorage.getItem("orgSlug") || "";
   let user: {
     current_organisation_slug?: string;
@@ -22,9 +26,14 @@ function getLoggedInRedirectPath(orgSlugFromState?: string) {
 
   if (!orgSlug) return null;
 
-  return user?.is_onboarded === false ? `/${orgSlug}/welcome` : `/${orgSlug}`;
+  const query = template ? `?template=${encodeURIComponent(template)}` : "";
+
+  return user?.is_onboarded === false
+    ? `/${orgSlug}/welcome${query}`
+    : `/${orgSlug}`;
 }
 
+/** Root authentication layout providing OAuth context and onboarding redirects. */
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -36,15 +45,18 @@ export default function RootLayout({
   const { orgSlug } = state;
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      const redirectPath = getLoggedInRedirectPath(orgSlug);
-      if (redirectPath) {
-        router.replace(redirectPath);
-        return;
+    (async () => {
+      const t = new URLSearchParams(window.location.search).get("template");
+      if (t) {
+        localStorage.setItem("selected_template", t);
       }
-    }
-    setLoading(false);
+      const token = localStorage.getItem("token");
+      if (token) {
+        const r = getLoggedInRedirectPath(orgSlug, t);
+        if (r) return router.replace(r);
+      }
+      setLoading(false);
+    })();
   }, [orgSlug, router]);
 
   if (loading) return;

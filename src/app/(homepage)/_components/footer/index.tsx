@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Plus_Jakarta_Sans } from "next/font/google";
-import { PostRequest } from "~/utils/request";
-import { useToast } from "~/components/ui/use-toast";
+import axios from "axios";
+import { showSuccess } from "~/components/toast/sonner";
 import {
   appStoreUrl,
   facebookUrl,
@@ -61,8 +61,18 @@ const solutionLinks: FooterLink[] = [
 const supportLinks: FooterLink[] = [
   {
     id: 0,
+    label: "About Us",
+    href: "/about",
+  },
+  {
+    id: 1,
     label: "Pricing",
     href: "/pricing",
+  },
+  {
+    id: 2,
+    label: "Download",
+    href: "/download",
   },
   {
     id: 3,
@@ -73,6 +83,7 @@ const supportLinks: FooterLink[] = [
 
 const resourcesLinks: FooterLink[] = [
   { id: 0, label: "Resource Library", href: "/resources" },
+  { id: 1, label: "Templates", href: "/templates" },
   { id: 2, label: "Privacy Policy", href: "/policy" },
   { id: 3, label: "Terms of Service", href: "/terms-of-service" },
 ];
@@ -136,33 +147,87 @@ const Footer = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState<boolean>(false);
-  const { toast } = useToast();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setLoading(true);
-    const token = localStorage.getItem("token") || "";
+
+    if (loading) return;
+
+    setError("");
 
     if (!validateEmail(email)) {
       setError("Please enter a valid email address.");
-      setLoading(false);
       return;
     }
 
-    const req = await PostRequest("/newsletter", { email: email }, token);
-    setLoading(false);
-    if (req?.data?.status_code === 201) {
-      setEmail("");
-      setError("");
-      toast({
-        description: "Email sent successfully!",
-      });
-    } else {
-      setError(req?.data?.message);
-      return;
+    setLoading(true);
+
+    try {
+      const token = localStorage.getItem("token") || "";
+      const req = await axios.post(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/newsletter`,
+        { email },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const isSuccess =
+        (req?.status === 201 ||
+          req?.status === 200 ||
+          req?.data?.status_code === 201 ||
+          req?.data?.status_code === 200) &&
+        req?.status !== 409 &&
+        req?.data?.status_code !== 409;
+
+      const isAlreadySubscribed =
+        req?.status === 409 || req?.data?.status_code === 409;
+
+      if (isSuccess) {
+        setEmail("");
+        setError("");
+        showSuccess(
+          "You're subscribed!",
+          "Thanks for joining us. Stay tuned for the latest updates from Zedu."
+        );
+      } else if (isAlreadySubscribed) {
+        setError(
+          "This email is already subscribed. Please try another email address."
+        );
+      } else {
+        setError(
+          req?.data?.message ||
+            "We couldn't subscribe you right now. Please try again."
+        );
+      }
+    } catch (error: any) {
+      const isAlreadySubscribed =
+        error?.status === 409 ||
+        error?.response?.status === 409 ||
+        error?.data?.status_code === 409 ||
+        error?.response?.data?.status_code === 409;
+
+      if (isAlreadySubscribed) {
+        setError(
+          "This email is already subscribed. Please try another email address."
+        );
+      } else {
+        console.error("Newsletter subscription error:", error);
+
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Something went wrong. Please try again.";
+
+        setError(message);
+      }
+    } finally {
+      setLoading(false);
     }
   };
-
   const validateEmail = (email: string) => {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(String(email).toLowerCase());
@@ -202,6 +267,7 @@ const Footer = () => {
                   />
                   <button
                     type="submit"
+                    disabled={loading}
                     className="relative flex h-full items-center justify-center rounded-[10px] bg-primary-500 px-4 py-2 text-sm font-medium leading-5 transition-all hover:bg-opacity-80"
                   >
                     <p className={loading ? "opacity-0" : ""}>Subscribe</p>
@@ -210,13 +276,17 @@ const Footer = () => {
                     ) : null}
                   </button>
                 </div>
-                {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+                {error && (
+                  <p role="alert" className="mt-2 text-sm text-red-300">
+                    {error}
+                  </p>
+                )}
               </div>
             </form>
 
             <div className="space-y-4">
               <p className="text-white/90">
-                Mobile App is available on Google PlayStore and AppStore
+                Mobile App is available on Google Play and the App Store
               </p>
               <div className="mt-5 flex flex-wrap items-start gap-8 text-white">
                 {appStoreLinks.map((store) => (

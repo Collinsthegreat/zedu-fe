@@ -13,7 +13,13 @@ import { RegisterWebhookRequest } from "~/utils/webhook-request";
 import { Separator } from "~/components/ui/separator";
 import AppleSignin from "react-apple-signin-auth";
 import { Eye, EyeOff } from "lucide-react";
+import {
+  PASSWORD_HINT,
+  PASSWORD_TOO_SHORT_MESSAGE,
+  isPasswordTooShort,
+} from "~/lib/password";
 
+/** User registration page supporting email/password, Google, Apple auth, and template onboarding. */
 function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,11 +33,16 @@ function SignUp() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [isMinLength, setIsMinLength] = useState(false);
-  const [isValidPassword, setIsValidPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleloading, setGoogleloading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
+  const tmpl =
+    searchParams.get("template") ||
+    (typeof window !== "undefined"
+      ? localStorage.getItem("selected_template")
+      : null);
+  const toWelcome = (slug: string) =>
+    `/${slug}/welcome${tmpl ? `?template=${tmpl}` : ""}`;
   // Apple Login handler
   const handleAppleSuccess = async (response: any) => {
     setAppleLoading(true);
@@ -50,13 +61,14 @@ function SignUp() {
         if (orgSlug) {
           localStorage.setItem("orgSlug", orgSlug);
         }
+
         if (redirectUrl) {
           router.push(redirectUrl);
         } else {
           if (user?.is_onboarded) {
             router.push(`/${orgSlug}`);
           } else {
-            router.push(`/${orgSlug}/welcome`);
+            router.push(toWelcome(orgSlug));
           }
         }
         const message = `\nName: ${user?.username}\\nEmail: ${user?.email}`;
@@ -90,12 +102,13 @@ function SignUp() {
     if (inviteEmail) {
       setEmail(inviteEmail.trim());
     }
+    const template = searchParams.get("template");
+    if (template) {
+      localStorage.setItem("selected_template", template);
+    }
   }, [searchParams]);
 
   useEffect(() => {
-    const minLength = password.length >= 6;
-    setIsMinLength(minLength);
-    setIsValidPassword(minLength);
     setFormSubmitted(false);
   }, [password]);
 
@@ -124,10 +137,8 @@ function SignUp() {
 
     if (!password || password.trim() === "") {
       newErrors.password = "Password is required";
-    } else if (!isValidPassword) {
-      newErrors.password = "Password is not valid";
-    } else if (!isMinLength) {
-      newErrors.password = "Password must have a minimum of 6 characters";
+    } else if (isPasswordTooShort(password)) {
+      newErrors.password = PASSWORD_TOO_SHORT_MESSAGE;
     }
 
     setErrors(newErrors);
@@ -163,7 +174,7 @@ function SignUp() {
       setEmail(trimmedEmail);
     }
 
-    if (validateForm() && isValidPassword) {
+    if (validateForm()) {
       setLoading(true);
       const payload = {
         email: trimmedEmail,
@@ -192,7 +203,7 @@ function SignUp() {
             if (res?.data?.data?.user?.is_onboarded) {
               router.push(`/${orgSlug}`);
             } else {
-              router.push(`/${orgSlug}/welcome`);
+              router.push(toWelcome(orgSlug));
             }
           }, 100);
         }
@@ -247,7 +258,7 @@ function SignUp() {
             if (user?.is_onboarded) {
               router.push(`/${orgSlug}`);
             } else {
-              router.push(`${orgSlug}/welcome`);
+              router.push(toWelcome(orgSlug));
             }
           }
 
@@ -340,6 +351,9 @@ function SignUp() {
                     value={password}
                     onChange={handlePasswordChange}
                     placeholder="Password"
+                    aria-describedby="password-help"
+                    aria-invalid={Boolean(errors.password)}
+                    autoComplete="new-password"
                     onFocus={handleFocus}
                     onBlur={handleBlur}
                     className={`w-full text-[14px] text-[#667085] leading-[15.12px] font-[500] h-[48px] border ${
@@ -366,11 +380,14 @@ function SignUp() {
                   </button>
                 </div>
 
-                {errors.password && (
-                  <small className="text-[12px] text-[#F81404]">
-                    {errors.password}
-                  </small>
-                )}
+                <small
+                  id="password-help"
+                  className={`text-[12px] ${
+                    errors.password ? "text-[#F81404]" : "text-[#667085]"
+                  }`}
+                >
+                  {errors.password || PASSWORD_HINT}
+                </small>
               </div>
             </div>
           </div>
