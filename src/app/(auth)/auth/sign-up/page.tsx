@@ -8,7 +8,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Checkbox } from "~/components/ui/checkbox";
 import Loading from "~/components/ui/loading";
 import { PostRequest } from "~/utils/request";
-import { provisionTemplateChannels } from "~/data/templates";
 import { useGoogleLogin } from "@react-oauth/google";
 import { RegisterWebhookRequest } from "~/utils/webhook-request";
 import { Separator } from "~/components/ui/separator";
@@ -44,8 +43,6 @@ function SignUp() {
       : null);
   const toWelcome = (slug: string) =>
     `/${slug}/welcome${tmpl ? `?template=${tmpl}` : ""}`;
-  const provisionIfTemplate = (orgId?: string, token?: string) =>
-    tmpl && orgId && provisionTemplateChannels(orgId, tmpl, token);
   // Apple Login handler
   const handleAppleSuccess = async (response: any) => {
     setAppleLoading(true);
@@ -64,10 +61,6 @@ function SignUp() {
         if (orgSlug) {
           localStorage.setItem("orgSlug", orgSlug);
         }
-        await provisionIfTemplate(
-          user?.current_org,
-          res?.data?.data?.access_token
-        );
 
         if (redirectUrl) {
           router.push(redirectUrl);
@@ -201,11 +194,6 @@ function SignUp() {
           localStorage.setItem("orgSlug", orgSlug);
         }
 
-        await provisionIfTemplate(
-          res?.data?.data?.user?.current_org,
-          res?.data?.data?.access_token
-        );
-
         if (redirectUrl) {
           setTimeout(() => {
             router.push(redirectUrl);
@@ -263,11 +251,6 @@ function SignUp() {
           if (orgSlug) {
             localStorage.setItem("orgSlug", orgSlug);
           }
-
-          await provisionIfTemplate(
-            user?.current_org,
-            res?.data?.data?.access_token
-          );
 
           if (redirectUrl) {
             router.push(redirectUrl);

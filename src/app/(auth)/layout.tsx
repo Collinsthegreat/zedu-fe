@@ -1,9 +1,8 @@
 "use client";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { useRouter } from "next/navigation";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { DataContext, DataProvider } from "~/store/GlobalState";
-import { provisionTemplateChannels } from "~/data/templates";
 
 /** Resolves the logged-in destination path, preserving template query param for un-onboarded users. */
 function getLoggedInRedirectPath(
@@ -44,36 +43,15 @@ export default function RootLayout({
   const router = useRouter();
   const { state } = useContext(DataContext);
   const { orgSlug } = state;
-  const provisionedRef = useRef(false);
 
   useEffect(() => {
     (async () => {
+      const t = new URLSearchParams(window.location.search).get("template");
+      if (t) {
+        localStorage.setItem("selected_template", t);
+      }
       const token = localStorage.getItem("token");
       if (token) {
-        const t = new URLSearchParams(window.location.search).get("template");
-        const orgId = localStorage.getItem("orgId");
-        let user: { is_onboarded?: boolean } | null = null;
-        try {
-          user = JSON.parse(localStorage.getItem("user") || "null");
-        } catch {
-          user = null;
-        }
-
-        // Only provision to the existing org if user is already onboarded;
-        // un-onboarded users will create their organization and provision in create-organization.
-        if (
-          t &&
-          orgId &&
-          user?.is_onboarded !== false &&
-          !provisionedRef.current
-        ) {
-          provisionedRef.current = true;
-          try {
-            await provisionTemplateChannels(orgId, t, token);
-          } catch {
-            // continue to redirect even if provisioning fails
-          }
-        }
         const r = getLoggedInRedirectPath(orgSlug, t);
         if (r) return router.replace(r);
       }
