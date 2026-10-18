@@ -25,6 +25,11 @@ interface LeaveChannelDialogProps {
   onConfirm: () => void;
 }
 
+/**
+ * Confirmation shown before a user leaves a channel. Explains what leaving
+ * means (public vs private wording), stays open while the leave request runs,
+ * and only calls `onConfirm` when the user clicks "Leave channel".
+ */
 export const LeaveChannelDialog = ({
   open,
   onOpenChange,
