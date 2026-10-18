@@ -123,12 +123,18 @@ export const ContactSalesForm = () => {
     setSending(true);
 
     const normalizedPhone = formData.phone.replace(/\D/g, "");
+    const orgType = formData.organization_type.trim();
+    const rawMessage = formData.message.trim();
+    const formattedMessage = orgType
+      ? `Organization type: ${orgType}\n\n${rawMessage}`
+      : rawMessage;
+
     const contactData = {
       name: formData.name.trim(),
       email: formData.email.trim(),
       phone_number: normalizedPhone,
-      organization_type: formData.organization_type.trim(),
-      message: formData.message.trim(),
+      organization_type: orgType,
+      message: formattedMessage,
     };
 
     try {

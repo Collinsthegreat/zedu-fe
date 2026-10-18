@@ -79,6 +79,7 @@ export const DataProvider = ({ children }: DataProviderProps) => {
     groupCallback: false,
 
     userTyping: [],
+    threadTyping: [],
 
     isEdit: false,
     isEditReply: false,
