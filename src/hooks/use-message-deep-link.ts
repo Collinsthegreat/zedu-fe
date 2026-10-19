@@ -24,6 +24,7 @@ export function useMessageDeepLink({
   const params = useParams();
   const { state, dispatch } = useContext(DataContext);
   const appliedRef = useRef<string | null>(null);
+  const preparedRef = useRef<string | null>(null);
   const threadRef = useRef(state?.thread);
   const loadThreadRef = useRef(state?.loadThread);
   const repliesRef = useRef(state?.replies);
@@ -41,6 +42,7 @@ export function useMessageDeepLink({
   useEffect(() => {
     if (!threadId) {
       appliedRef.current = null;
+      preparedRef.current = null;
       return;
     }
 
@@ -110,10 +112,11 @@ export function useMessageDeepLink({
       return;
     }
 
-    const highlightId = threadId;
-
-    setMessageHighlight(highlightId);
-    dispatch({ type: ACTIONS.DATA_ID, payload: highlightId });
+    if (preparedRef.current !== signature) {
+      setMessageHighlight(threadId);
+      dispatch({ type: ACTIONS.DATA_ID, payload: threadId });
+      preparedRef.current = signature;
+    }
 
     if (parentThread) {
       if (shouldOpenDrawer) {

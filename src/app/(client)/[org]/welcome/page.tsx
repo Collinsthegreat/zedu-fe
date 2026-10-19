@@ -2,14 +2,27 @@
 import { useContext, useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { GetRequest } from "~/utils/request";
 import { DataContext } from "~/store/GlobalState";
+
+// The backend auto-creates a workspace at signup, so onboard-status can be
+// true before the user has chosen one. A missing type is never default.
+const isAutoCreatedOrg = () => {
+  try {
+    const user = JSON.parse(localStorage.getItem("user") || "null");
+    const type = user?.organisation?.type ?? "";
+    return type.trim().toLowerCase() === "user default org";
+  } catch {
+    return false;
+  }
+};
 
 /** Welcome onboarding view allowing user to initiate organization creation. */
 const Welcome = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { org } = useParams<{ org: string }>();
   const [loading, setLoading] = useState(true);
   const { state } = useContext(DataContext);
   const { orgSlug } = state;
@@ -20,13 +33,13 @@ const Welcome = () => {
       const token = localStorage.getItem("token") || "";
       const userstatus = await GetRequest("/auth/onboard-status", token);
 
-      if (userstatus?.data?.data?.status) {
-        router.push("/dashboard");
+      if (userstatus?.data?.data?.status && !isAutoCreatedOrg()) {
+        router.push(`/${org}`);
       } else {
         setLoading(false);
       }
     })();
-  }, [router]);
+  }, [router, org]);
 
   if (loading) return;
 

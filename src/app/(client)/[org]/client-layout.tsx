@@ -20,7 +20,6 @@ import { UploadProvider } from "~/store/UploadContext";
 import UploadProgressPopover from "./_components/file-management/UploadProgressPopover";
 import OneSignalProvider from "~/components/layout/onesignal/onesignal-provider";
 import OneSignalSubscriptionSync from "~/components/layout/onesignal/onesignal-subscription";
-import { NotificationBanner } from "./_components/notification-banner";
 import IncomingCallPopupContainer from "~/app/(client)/[org]/_components/buzz-management/IncomingCallPopupContainer";
 import StatusConnection from "~/components/layout/centrifugo/status-connection";
 import ChatBuzzSidePanel from "./_components/buzz-management/chatBuzzSidePanel";
@@ -118,6 +117,16 @@ const ClientLayout = ({
     }
 
     if (slug === "client") {
+      // "/client/*" is an alias for the current org (used by marketing links
+      // that can't know the slug). Swap in the real slug once we have one.
+      if (storedSlug && storedSlug !== "client" && storedSlug !== "undefined") {
+        router.replace(
+          `${pathname.replace(/^\/client/, `/${storedSlug}`)}${window.location.search}`
+        );
+        return () => {
+          cancelled = true;
+        };
+      }
       dispatch({
         type: ACTIONS.ORG_SLUG,
         payload: "client",
@@ -341,7 +350,6 @@ const ClientLayout = ({
           </div>
         </ChannelBuzzProvider>
         <UploadProgressPopover />
-        <NotificationBanner />
         <IncomingCallPopupContainer />
       </TooltipProvider>
     </UploadProvider>
