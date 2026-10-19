@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Plus_Jakarta_Sans } from "next/font/google";
-import axios from "axios";
+import { PostRequest } from "~/utils/new-request";
 import { showSuccess } from "~/components/toast/sonner";
 import {
   appStoreUrl,
@@ -163,17 +163,7 @@ const Footer = () => {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("token") || "";
-      const req = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL}/newsletter`,
-        { email },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const req = await PostRequest("/newsletter", { email });
 
       const isSuccess =
         (req?.status === 201 ||
