@@ -1109,7 +1109,7 @@ $result = $stmt->get_result();
         <div className="flex-1 flex flex-col justify-end relative overflow-hidden">
           <div
             ref={scrollContainerRef}
-            className="overflow-y-auto pb-5 mb-[180px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] relative"
+            className="overflow-y-auto pb-5 mb-[180px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
           >
             {/* Empty intro section for users that are selected */}
             {/* Messages section */}
@@ -1126,7 +1126,7 @@ $result = $stmt->get_result();
                 return (
                   <React.Fragment key={message.id}>
                     {showDateDivider && (
-                      <div className="relative my-4">
+                      <div className="sticky top-0 z-10 my-4 bg-white">
                         <div className="absolute inset-0 flex items-center">
                           <div className="w-full border-t border-dotted border-[#E6EAEF]"></div>
                         </div>
@@ -1237,14 +1237,14 @@ $result = $stmt->get_result();
               })}
               <div ref={messagesEndRef} />
             </div>
-
-            <ScrollToLatestButton
-              scrollContainerRef={scrollContainerRef}
-              isAtBottom={!showScrollButton}
-              onScrollToBottom={scrollToBottom}
-              scrollToTop={false}
-            />
           </div>
+
+          <ScrollToLatestButton
+            scrollContainerRef={scrollContainerRef}
+            isAtBottom={!showScrollButton}
+            scrollToTop={false}
+            className="bottom-[196px] right-6"
+          />
         </div>
       </div>
     </div>

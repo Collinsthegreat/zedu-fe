@@ -61,7 +61,12 @@ export async function provisionTemplateChannels(
 ): Promise<boolean> {
   const t =
     orgId && getTemplateBySlug(slug || getStored("selected_template") || "");
-  if (!t) return false;
+  if (!t) {
+    if (typeof window !== "undefined" && getStored("selected_template")) {
+      localStorage.removeItem("selected_template");
+    }
+    return false;
+  }
   const auth = token || getStored("token") || "";
   let u: any = {};
   try {
@@ -76,21 +81,27 @@ export async function provisionTemplateChannels(
     is_private: false,
     Username,
   });
-  const results = await Promise.all(
-    t.channels.map((n) => PostRequest("/channels", payload(n), auth))
-  );
-  const allSuccessful =
-    results.length > 0 &&
-    results.every(
-      (res: any) => res && (res.status === 200 || res.status === 201)
+  try {
+    const results = await Promise.all(
+      t.channels.map((n) => PostRequest("/channels", payload(n), auth))
     );
+    const isSuccessOrConflict = (res: any) =>
+      res &&
+      (res.status === 200 ||
+        res.status === 201 ||
+        res.status === 409 ||
+        res?.data?.status_code === 200 ||
+        res?.data?.status_code === 201 ||
+        res?.data?.status_code === 409);
 
-  if (allSuccessful) {
+    const hasSuccess =
+      results.length > 0 &&
+      results.some((res: any) => isSuccessOrConflict(res));
+
+    return hasSuccess;
+  } finally {
     if (typeof window !== "undefined") {
       localStorage.removeItem("selected_template");
     }
-    return true;
   }
-
-  return false;
 }

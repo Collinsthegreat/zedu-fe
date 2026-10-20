@@ -22,6 +22,7 @@ import {
 import EmojiPicker from "~/components/theme/themed-emoji-picker";
 import data from "@emoji-mart/data";
 import More from "./more";
+import ShareFileModal from "./share-file-modal";
 import UserHoverCard from "../hover-card/user";
 import {
   DeleteSavedMessage,
@@ -63,6 +64,7 @@ const Message = ({
   const isSaved = bookmarks?.some((b: any) => b.thread_id === item.thread_id);
   const [usernames, setUsernames] = useState<any>([]);
   const [showMobileActions, setShowMobileActions] = useState(false);
+  const [isForwardOpen, setIsForwardOpen] = useState(false);
 
   // user data
   const isOnline = orgMembers?.find(
@@ -213,13 +215,31 @@ const Message = ({
     }
   };
 
+  // Join/leave notices render as a single line; the @mention already names the user
+  if (item?.type === "system") {
+    return (
+      <div className="message-row flex items-center gap-2 px-5 py-1">
+        <span className="min-w-[36px] whitespace-nowrap text-xs text-[#98A2B3]">
+          {new Date(item?.created_at).toLocaleTimeString([], {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          })}
+        </span>
+        <div className="min-w-0 flex-1">
+          <MessageItem item={item} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={containerRef}
       className={`relative group message-row py-1 transition-colors flex items-start px-5 gap-2`}
       onClick={handleMessageClick}
     >
-      <div className="flex items-center justify-center">
+      <div className="flex shrink-0 items-center justify-center">
         {shouldShowAvatar ? (
           <>
             <div className="relative inline-flex">
@@ -247,7 +267,7 @@ const Message = ({
         )}
       </div>
 
-      <div className="w-full">
+      <div className="min-w-0 flex-1">
         {shouldShowAvatar && (
           <div className="flex items-center gap-2">
             <span
@@ -258,6 +278,9 @@ const Message = ({
             </span>
 
             <span className="text-xs text-[#98A2B3] mt-[1px]">
+              {new Date(item?.created_at).toLocaleDateString([], {
+                weekday: "short",
+              })}{" "}
               {new Date(item?.created_at).toLocaleTimeString([], {
                 hour: "numeric",
                 minute: "2-digit",
@@ -267,9 +290,11 @@ const Message = ({
           </div>
         )}
 
-        <div className="relative flex items-start justify-between">
-          <div className="flex items-start gap-2">
-            <MessageItem item={item} />
+        <div className="relative flex min-w-0 items-start justify-between">
+          <div className="flex min-w-0 flex-1 items-start gap-2">
+            <div className="min-w-0 flex-1">
+              <MessageItem item={item} />
+            </div>
 
             <div className="text-[9px] text-neutral-500 mt-[2px]">
               {(item.user_type === "user" || item.user_type === "") &&
@@ -391,7 +416,12 @@ const Message = ({
               </button>
             )}
 
-            <button className="py-[7px] px-[10px] hover:bg-gray-200 rounded">
+            <button
+              className="py-[7px] px-[10px] hover:bg-gray-200 rounded"
+              onClick={() => setIsForwardOpen(true)}
+              aria-label="Forward message"
+              title="Forward message"
+            >
               <Forward size={18} className="text-[#667085]" />
             </button>
 
@@ -409,6 +439,15 @@ const Message = ({
             <More item={item} />
           </div>
         )}
+      </div>
+
+      {/* Dialogs render in a portal, but React events still bubble to the row's onClick */}
+      <div onClick={(e) => e.stopPropagation()}>
+        <ShareFileModal
+          open={isForwardOpen}
+          onClose={() => setIsForwardOpen(false)}
+          item={{ ...item, channels_id: item?.channels_id ?? id }}
+        />
       </div>
     </div>
   );
