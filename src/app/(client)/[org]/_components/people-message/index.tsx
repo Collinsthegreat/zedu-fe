@@ -133,7 +133,7 @@ const PeopleMessage = ({ participant }: any) => {
   //
 
   return (
-    <div className="relative w-full flex-1 min-h-0">
+    <div className="relative w-full flex-1 min-h-0 flex flex-col">
       {showBadge && state?.dmCount > 0 && (
         <Badge
           onClick={() => {
@@ -160,13 +160,12 @@ const PeopleMessage = ({ participant }: any) => {
         id="scrollableDivs"
         ref={scrollableContainerRef}
         style={{
-          height: "100dvh",
           overflowY: "scroll",
           display: "flex",
           flexDirection: "column-reverse",
           paddingBottom: "var(--chat-composer-height, 140px)",
         }}
-        className="w-full"
+        className="min-h-0 w-full flex-1"
       >
         <InfiniteScroll
           dataLength={chats?.length}

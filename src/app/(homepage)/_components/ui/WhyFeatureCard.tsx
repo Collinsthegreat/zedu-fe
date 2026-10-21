@@ -6,6 +6,7 @@ type WhyFeatureCardProps = {
   desc: string;
   icon?: React.ComponentType<{ className?: string; strokeWidth?: number }>;
   className?: string;
+  cta?: React.ReactNode;
 };
 
 export const WhyFeatureCard = ({
@@ -13,6 +14,7 @@ export const WhyFeatureCard = ({
   desc,
   icon: Icon = Sparkles,
   className = "",
+  cta,
 }: WhyFeatureCardProps) => {
   return (
     <article
@@ -31,6 +33,7 @@ export const WhyFeatureCard = ({
         {title}
       </h3>
       <p className="leading-relaxed text-neutral-600">{desc}</p>
+      {cta}
     </article>
   );
 };

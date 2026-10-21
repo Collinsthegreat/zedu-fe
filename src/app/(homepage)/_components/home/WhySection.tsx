@@ -1,9 +1,11 @@
+"use client";
+
 import { WhyFeatureCard } from "../ui/WhyFeatureCard";
 import { WhyCard } from "../ui/WhyCard";
 import { ArrowBtn } from "../ui/Button";
 import { otherReasons, whyCardsData } from "../../_lib";
 import Image from "next/image";
-import { GraduationCap, Users } from "lucide-react";
+import { ArrowRight, GraduationCap, Users } from "lucide-react";
 
 const whyCardIcons = [GraduationCap, Users];
 
@@ -28,6 +30,28 @@ export const WhySection = () => {
               title={card.title}
               desc={card.desc}
               icon={whyCardIcons[index]}
+              cta={
+                card.title === "No Per-Seat Fees" ? (
+                  <button
+                    type="button"
+                    onClick={(e) =>
+                      window.dispatchEvent(
+                        new CustomEvent("open-zedu-calculator", {
+                          detail: e.currentTarget,
+                        })
+                      )
+                    }
+                    className="group mt-1 inline-flex items-center gap-1.5 rounded-full border border-primary-500 bg-transparent px-4 py-1.5 text-sm font-semibold text-primary-500 transition-colors duration-150 hover:bg-primary-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500"
+                  >
+                    Calculate Your Savings
+                    <ArrowRight
+                      className="transition-transform duration-300 ease-out group-hover:translate-x-1"
+                      size={15}
+                      strokeWidth={2.5}
+                    />
+                  </button>
+                ) : undefined
+              }
             />
           ))}
         </div>
@@ -52,7 +76,7 @@ export const WhySection = () => {
               </h2>
             </div>
             <div className="mt-1">
-              <ArrowBtn text="Get started for free" inverted linkToHome />
+              <ArrowBtn text="Get started for free" linkToHome />
             </div>
           </div>
 

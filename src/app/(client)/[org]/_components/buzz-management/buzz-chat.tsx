@@ -70,7 +70,7 @@ const BuzzChat = () => {
     return () => {
       container.removeEventListener("scroll", handleScroll);
     };
-  }, [getData]);
+  }, [getData, loading]);
 
   // Runs when new messages arrive; reads the latest badge and user without re-running on them.
   const markReadOnNewMessage = useEffectEvent(() => {
@@ -134,7 +134,7 @@ const BuzzChat = () => {
   return (
     <div className="flex flex-col h-full">
       <ChannelConnection />
-      <div className="flex-grow relative min-h-0 overflow-hidden">
+      <div className="flex-grow relative min-h-0 overflow-hidden flex flex-col">
         {showBadge && state?.threadCount > 0 && (
           <Badge
             onClick={() => {
@@ -164,12 +164,11 @@ const BuzzChat = () => {
           id="scrollableDivs"
           ref={scrollableContainerRef}
           style={{
-            height: "100%",
             overflowY: "scroll",
             display: "flex",
             flexDirection: "column-reverse",
           }}
-          className="w-full"
+          className="min-h-0 w-full flex-1"
         >
           <InfiniteScroll
             dataLength={messages?.length || 0}
