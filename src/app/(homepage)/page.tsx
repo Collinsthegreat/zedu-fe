@@ -6,6 +6,8 @@ import { PricingSection } from "./_components/home/PricingSection";
 import { WhySection } from "./_components/home/WhySection";
 import { FAQSection } from "./_components/home/FAQSection";
 import { DynamicFooter } from "./_components/footer/dynamic-footer";
+import { getHomeStructuredData } from "./_lib/homeStructuredData";
+import { ogImageUrl } from "~/lib/env-urls";
 
 export const metadata: Metadata = {
   title: {
@@ -18,6 +20,14 @@ export const metadata: Metadata = {
     description:
       "Built for modern learning: structured channels, AI-powered support, flexible education pricing, and tools that help educators run better cohorts.",
     url: "/",
+    images: [
+      {
+        url: ogImageUrl("og-image-5.png"),
+        width: 1200,
+        height: 630,
+        alt: "Zedu - Learning Platform for Bootcamps, Schools, and Cohorts",
+      },
+    ],
   },
   alternates: {
     canonical: "/",
@@ -25,8 +35,17 @@ export const metadata: Metadata = {
 };
 
 const HomePage = () => {
+  const structuredData = JSON.stringify(getHomeStructuredData()).replace(
+    /</g,
+    "\\u003c"
+  );
+
   return (
     <section className="mt-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: structuredData }}
+      />
       <HeroSection />
       <FeatureSection />
       <ArticlesSection />

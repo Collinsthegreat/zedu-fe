@@ -108,21 +108,23 @@ const PreviewLinks = ({
   return (
     <div ref={containerRef} className="contents">
       {previews.length > 0 ? (
-        <div className="mt-2">
+        <div className="mt-2 w-full min-w-0 max-w-full">
           {previews.map((preview, index) => (
             <a
               key={index}
               href={preview.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="block border w-full rounded-md p-3 mb-2 hover:bg-gray-100 transition"
+              className="flex w-full min-w-0 max-w-full items-center gap-3 overflow-hidden rounded-md border p-2 mb-2 transition hover:bg-gray-100"
             >
-              <div className="mb-2">
-                <div className="text-sm font-semibold text-gray-800">
+              <div className="min-w-0 flex-1">
+                <div className="block min-w-0 max-w-full truncate text-sm font-semibold text-gray-800">
                   {preview.siteName}
                 </div>
-                <div className="text-blue-600 font-medium">{preview.title}</div>
-                <div className="text-gray-600 text-sm">
+                <div className="block min-w-0 max-w-full truncate text-blue-600 font-medium">
+                  {preview.title}
+                </div>
+                <div className="block min-w-0 max-w-full truncate text-gray-600 text-sm">
                   {preview.description}
                 </div>
               </div>
@@ -131,7 +133,7 @@ const PreviewLinks = ({
                 <img
                   src={preview.image}
                   alt={preview.title}
-                  className="w-80 h-40 object-cover rounded-md mt-2"
+                  className="h-16 w-16 shrink-0 rounded-md object-cover"
                 />
               )}
             </a>

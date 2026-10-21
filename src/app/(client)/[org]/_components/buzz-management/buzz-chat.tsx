@@ -1,9 +1,10 @@
 "use client";
 import React, {
-  Fragment,
+  useCallback,
   useContext,
-  useRef,
   useEffect,
+  useEffectEvent,
+  useRef,
   useState,
 } from "react";
 
@@ -41,9 +42,9 @@ const BuzzChat = () => {
   const scrollableContainerRef = useRef<HTMLDivElement>(null);
   const hasDispatchedRef = useRef(false);
 
-  const getData = async () => {
+  const getData = useCallback(async () => {
     await GetRequest(`/threads/channels/${id}?page=1&limit=1`);
-  };
+  }, [id]);
 
   useEffect(() => {
     const container = scrollableContainerRef.current;
@@ -69,12 +70,17 @@ const BuzzChat = () => {
     return () => {
       container.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [getData]);
 
-  useEffect(() => {
+  // Runs when new messages arrive; reads the latest badge and user without re-running on them.
+  const markReadOnNewMessage = useEffectEvent(() => {
     if (!showBadge && notify?.user_id !== user?.user_id) {
       getData();
     }
+  });
+
+  useEffect(() => {
+    markReadOnNewMessage();
   }, [messages]);
 
   const handleSendMessage = async (
@@ -119,7 +125,7 @@ const BuzzChat = () => {
         el.classList.remove("bg-yellow-100");
       }, 1500);
     }
-  }, [dataId, loading]);
+  }, [dataId, loading, pathname]);
 
   if (loading) return null;
 
@@ -128,7 +134,32 @@ const BuzzChat = () => {
   return (
     <div className="flex flex-col h-full">
       <ChannelConnection />
-      <div className="flex-grow overflow-y-auto">
+      <div className="flex-grow relative min-h-0 overflow-hidden">
+        {showBadge && state?.threadCount > 0 && (
+          <Badge
+            onClick={() => {
+              if (scrollableContainerRef.current) {
+                scrollableContainerRef.current.scrollTop = 0;
+              }
+              dispatch({
+                type: ACTIONS.COUNT_CALLBACK,
+                payload: !state?.countCallback,
+              });
+            }}
+            className="absolute bottom-16 z-20 mx-auto cursor-pointer -translate-x-[50%] left-1/2 px-3 py-1.5 flex gap-1 bg-primary-500 font-normal text-white text-[0.8125rem] border border-[E6EAEF]"
+          >
+            <ArrowDownIcon />
+            Latest messages
+          </Badge>
+        )}
+
+        <ScrollToLatestButton
+          scrollContainerRef={scrollableContainerRef}
+          isAtBottom={!showBadge}
+          onScrollToBottom={getData}
+          className="bottom-4 right-4"
+        />
+
         <div
           id="scrollableDivs"
           ref={scrollableContainerRef}
@@ -138,32 +169,8 @@ const BuzzChat = () => {
             display: "flex",
             flexDirection: "column-reverse",
           }}
-          className="w-full relative"
+          className="w-full"
         >
-          {showBadge && state?.threadCount > 0 && (
-            <Badge
-              onClick={() => {
-                if (scrollableContainerRef.current) {
-                  scrollableContainerRef.current.scrollTop = 0;
-                }
-                dispatch({
-                  type: ACTIONS.COUNT_CALLBACK,
-                  payload: !state?.countCallback,
-                });
-              }}
-              className="absolute bottom-40 z-20 mx-auto cursor-pointer -translate-x-[50%] left-1/2 px-3 py-1.5 flex gap-1 bg-primary-500 font-normal text-white text-[0.8125rem] border border-[E6EAEF]"
-            >
-              <ArrowDownIcon />
-              Latest messages
-            </Badge>
-          )}
-
-          <ScrollToLatestButton
-            scrollContainerRef={scrollableContainerRef}
-            isAtBottom={!showBadge}
-            onScrollToBottom={getData}
-          />
-
           <InfiniteScroll
             dataLength={messages?.length || 0}
             next={fetchMoreData}
@@ -178,14 +185,14 @@ const BuzzChat = () => {
             style={{
               display: "flex",
               flexDirection: "column-reverse",
-              overflowY: "visible",
+              overflow: "visible",
             }}
             scrollableTarget="scrollableDivs"
             inverse={true}
           >
             {Object.entries(groupedMessages)?.map(
               ([dateLabel, threads]: any) => (
-                <Fragment key={dateLabel}>
+                <div key={dateLabel} className="flex flex-col-reverse">
                   {threads?.map((item: any, index: number) => {
                     const nextMessage = threads[index + 1];
                     const shouldShowAvatar =
@@ -264,7 +271,7 @@ const BuzzChat = () => {
                     );
                   })}
 
-                  <div className="relative my-2">
+                  <div className="sticky top-0 z-10 my-2">
                     <div className="absolute inset-0 flex items-center">
                       <div className="w-full border-t border-dotted border-[#E6EAEF]"></div>
                     </div>
@@ -274,7 +281,7 @@ const BuzzChat = () => {
                       </span>
                     </div>
                   </div>
-                </Fragment>
+                </div>
               )
             )}
           </InfiniteScroll>
