@@ -273,7 +273,7 @@ const AboutPage = () => {
         <div className="pointer-events-none absolute inset-0">
           <Image
             src="/images/homepage/about-svg-bg.png"
-            alt="Decorative stars background"
+            alt=""
             fill
             sizes="100vw"
             className="object-cover object-center"

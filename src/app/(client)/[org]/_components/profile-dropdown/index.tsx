@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import Image from "next/image";
-import { Pencil, Rocket, Smile } from "lucide-react";
+import { Bug, Pencil, Rocket, Smile } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +14,7 @@ import { ACTIONS } from "~/store/Actions";
 import StatusModal from "../status";
 import { PostRequest } from "~/utils/new-request";
 import Link from "next/link";
+import { buildReportProblemHref } from "~/lib/report-problem";
 
 interface ProfileDropdownProps {
   user: any;
@@ -257,6 +258,18 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ user }) => {
               </div>
             </DropdownMenuItem>
           </Link>
+
+          <DropdownMenuItem
+            onClick={() => {
+              window.open(buildReportProblemHref(), "_self");
+            }}
+            className="px-5 py-2 cursor-pointer hover:bg-blue-500 hover:text-white"
+          >
+            <div className="flex items-center gap-2">
+              <Bug size={18} />
+              <span>Report a problem</span>
+            </div>
+          </DropdownMenuItem>
 
           <DropdownMenuItem
             onClick={handleLogout}

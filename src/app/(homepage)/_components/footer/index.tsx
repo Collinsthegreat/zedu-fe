@@ -143,7 +143,11 @@ const Footer = () => {
         <div className="flex flex-col gap-12 xl:flex-row xl:items-start xl:justify-between xl:gap-16">
           <div className="w-full max-w-[420px] space-y-8">
             <div className="flex items-center gap-3">
-              <Link href="/" className="[&>svg]:h-[39px] [&>svg]:w-[39px]">
+              <Link
+                href="/"
+                aria-label="Zedu home"
+                className="[&>svg]:h-[39px] [&>svg]:w-[39px]"
+              >
                 <ZeduRoundedWhiteLogo />
               </Link>
               <h3 className="text-2xl font-semibold leading-none text-white">

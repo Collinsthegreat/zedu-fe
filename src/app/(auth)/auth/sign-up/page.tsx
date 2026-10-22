@@ -392,10 +392,13 @@ function SignUp() {
           </div>
           <div className="flex flex-col gap-[12px] mb-3">
             <div className="flex flex-row gap-[6px] items-center">
-              <Checkbox className="mt-[2px]" />
-              <p className="text-[14px] font-[400] leading-[17.64px]">
+              <Checkbox id="stay-signed-in" className="mt-[2px]" />
+              <label
+                htmlFor="stay-signed-in"
+                className="text-[14px] font-[400] leading-[17.64px]"
+              >
                 Stay Signed In
-              </p>
+              </label>
             </div>
           </div>
           <div className="flex flex-col gap-[24px]">

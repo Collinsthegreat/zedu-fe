@@ -33,6 +33,8 @@ const ProfileSidebar = ({ user }: any) => {
         {/* <h2 className="text-[#1D2939] text-lg font-bold">Profile</h2> */}
 
         <button
+          aria-label="Close profile"
+          title="Close profile"
           onClick={onClose}
           className="text-[#344054] p-1 border border-input rounded-[0.3125rem]"
         >
