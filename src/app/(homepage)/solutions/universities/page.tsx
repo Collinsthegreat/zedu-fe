@@ -69,7 +69,7 @@ const higherEducationCards = [
     desc: "Create dedicated channels so conversations, announcements, and resources stay structured and accessible.",
   },
   {
-    title: "AI Assisted Learning",
+    title: "AI-Assisted Learning",
     desc: "Built-in AI tools help summarize discussions, answer common questions, and support both educators and students.",
   },
 ];

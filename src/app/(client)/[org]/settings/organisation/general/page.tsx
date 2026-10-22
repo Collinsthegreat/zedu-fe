@@ -22,7 +22,7 @@ const AccountPage = () => {
             Your Organisation Information
           </h1>
           <p className="text-sm text-[#344054]">
-            Manage your account data with ease.
+            Manage your organisation's details.
           </p>
         </div>
 
