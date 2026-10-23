@@ -19,11 +19,11 @@ import {
   isPasswordTooShort,
 } from "~/lib/password";
 
+/** User registration page supporting email/password, Google, Apple auth, and template onboarding. */
 // The backend auto-creates a workspace at signup, so `is_onboarded` being
 // true does not mean the user ever chose one. A missing type is never default.
 const isAutoCreatedOrg = (type?: string) =>
   (type ?? "").trim().toLowerCase() === "user default org";
-
 function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,6 +40,13 @@ function SignUp() {
   const [loading, setLoading] = useState(false);
   const [googleloading, setGoogleloading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
+  const tmpl =
+    searchParams.get("template") ||
+    (typeof window !== "undefined"
+      ? localStorage.getItem("selected_template")
+      : null);
+  const toWelcome = (slug: string) =>
+    `/${slug}/welcome${tmpl ? `?template=${tmpl}` : ""}`;
   // Apple Login handler
   const handleAppleSuccess = async (response: any) => {
     setAppleLoading(true);
@@ -58,6 +65,7 @@ function SignUp() {
         if (orgSlug) {
           localStorage.setItem("orgSlug", orgSlug);
         }
+
         if (redirectUrl) {
           router.push(redirectUrl);
         } else {
@@ -67,7 +75,7 @@ function SignUp() {
           ) {
             router.push(`/${orgSlug}`);
           } else {
-            router.push(`/${orgSlug}/welcome`);
+            router.push(toWelcome(orgSlug));
           }
         }
         const message = `\nName: ${user?.username}\\nEmail: ${user?.email}`;
@@ -100,6 +108,10 @@ function SignUp() {
     const inviteEmail = searchParams.get("email");
     if (inviteEmail) {
       setEmail(inviteEmail.trim());
+    }
+    const template = searchParams.get("template");
+    if (template) {
+      localStorage.setItem("selected_template", template);
     }
   }, [searchParams]);
 
@@ -201,7 +213,7 @@ function SignUp() {
             ) {
               router.push(`/${orgSlug}`);
             } else {
-              router.push(`/${orgSlug}/welcome`);
+              router.push(toWelcome(orgSlug));
             }
           }, 100);
         }
@@ -259,7 +271,7 @@ function SignUp() {
             ) {
               router.push(`/${orgSlug}`);
             } else {
-              router.push(`/${orgSlug}/welcome`);
+              router.push(toWelcome(orgSlug));
             }
           }
 
@@ -396,13 +408,10 @@ function SignUp() {
           </div>
           <div className="flex flex-col gap-[12px] mb-3">
             <div className="flex flex-row gap-[6px] items-center">
-              <Checkbox id="stay-signed-in" className="mt-[2px]" />
-              <label
-                htmlFor="stay-signed-in"
-                className="text-[14px] font-[400] leading-[17.64px]"
-              >
+              <Checkbox className="mt-[2px]" />
+              <p className="text-[14px] font-[400] leading-[17.64px]">
                 Stay Signed In
-              </label>
+              </p>
             </div>
           </div>
           <div className="flex flex-col gap-[24px]">

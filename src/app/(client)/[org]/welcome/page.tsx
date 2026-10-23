@@ -2,7 +2,7 @@
 import { useContext, useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import Image from "next/image";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { GetRequest } from "~/utils/request";
 import { DataContext } from "~/store/GlobalState";
 
@@ -18,8 +18,10 @@ const isAutoCreatedOrg = () => {
   }
 };
 
+/** Welcome onboarding view allowing user to initiate organization creation. */
 const Welcome = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { org } = useParams<{ org: string }>();
   const [loading, setLoading] = useState(true);
   const { state } = useContext(DataContext);
@@ -65,9 +67,14 @@ const Welcome = () => {
 
           <div>
             <Button
-              onClick={() =>
-                router.push(`/${orgSlug}/welcome/create-organization`)
-              }
+              onClick={() => {
+                const template = searchParams.get("template");
+                router.push(
+                  `/${orgSlug}/welcome/create-organization${
+                    template ? `?template=${encodeURIComponent(template)}` : ""
+                  }`
+                );
+              }}
               className=" bg-blue-400 w-[180px] py-6 px-10 text-white text-base font-medium hover hover:bg-blue-300"
             >
               Get Started
