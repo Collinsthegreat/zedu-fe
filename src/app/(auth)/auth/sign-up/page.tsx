@@ -387,7 +387,6 @@ function SignUp() {
                     placeholder="Password"
                     aria-describedby="password-help"
                     aria-invalid={Boolean(errors.password)}
-                    autoComplete="new-password"
                     onFocus={handleFocus}
                     onBlur={handleBlur}
                     className={`w-full text-[14px] text-[#667085] leading-[15.12px] font-[500] h-[48px] border ${
