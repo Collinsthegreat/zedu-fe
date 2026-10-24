@@ -52,9 +52,7 @@ export default function GeneralNotificationConnection() {
     // ask for permission early on
     if (typeof window !== "undefined" && "Notification" in window) {
       if (Notification.permission !== "granted") {
-        Notification.requestPermission().then((permission) => {
-          console.log("Notification permission:", permission);
-        });
+        Notification.requestPermission();
       }
     }
   }, []);
@@ -84,8 +82,6 @@ export default function GeneralNotificationConnection() {
 
       const result = ctx?.data;
 
-      // console.log("general notification", ctx?.data);
-
       if (
         result?.section === "thread_message" &&
         result?.notification_type == "new_message"
@@ -101,7 +97,6 @@ export default function GeneralNotificationConnection() {
         //     payload: message,
         //   });
         //   dispatch({ type: ACTIONS.CHANNEL_CALLBACK, payload: !channelCallback });
-        //   console.log("channel message general notification", ctx?.data);
         // }
 
         // if (message?.channel_id && message?.thread_id && !isChannelMessage) {
@@ -110,7 +105,6 @@ export default function GeneralNotificationConnection() {
         //     payload: message,
         //   });
         //   dispatch({ type: ACTIONS.HOME_DMS_CALLBACK });
-        //   console.log("home dmgeneral notification", ctx?.data);
         // }
 
         if (audioPlayer.current === null) return;

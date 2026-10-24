@@ -407,7 +407,8 @@ function Policy() {
             <p>We may use the information we collect in the following way:</p>
             <ul className="list-disc">
               <li>To personalize user experience</li>
-              <li>To improve our site To send periodic emails</li>
+              <li>To improve our site</li>
+              <li>To send periodic emails</li>
               <li>To send you service updates or promotional messages</li>
               <li>To respond to inquiries or support requests</li>
             </ul>

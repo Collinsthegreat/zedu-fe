@@ -321,7 +321,7 @@ function SignUp() {
     <main className="w-full min-h-screen flex flex-col items-center">
       <div className="flex items-center justify-between w-full py-6 max-w-7xl px-4 sm:px-6 lg:px-8">
         <Link href="/">
-          <Image src="/Zedu.png" alt="" width={86} height={31} />
+          <Image src="/Zedu.png" alt="Zedu home" width={86} height={31} />
         </Link>
         <div>
           Already have an account?{" "}
@@ -353,6 +353,7 @@ function SignUp() {
                 <input
                   id="email"
                   type="email"
+                  autoComplete="email"
                   value={email}
                   onChange={handleEmailChange}
                   onBlur={handleEmailBlur}
@@ -380,6 +381,7 @@ function SignUp() {
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
                     value={password}
                     onChange={handlePasswordChange}
                     placeholder="Password"
