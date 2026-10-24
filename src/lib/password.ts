@@ -1,5 +1,6 @@
-// The API rejects a new password shorter than this (`min=7` in zedu-be), so
-// every form that sets a password checks it before sending the request.
+// The backend enforces `min=7` on reset and change-password endpoints (`min=7`
+// in zedu-be), while sign-up enforces it client-side for consistency. Every form
+// that sets a password checks it before sending the request.
 export const PASSWORD_MIN_LENGTH = 7;
 
 export const PASSWORD_HINT = `At least ${PASSWORD_MIN_LENGTH} characters`;

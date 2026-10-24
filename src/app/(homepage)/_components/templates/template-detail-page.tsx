@@ -13,8 +13,8 @@ export async function generateMetadata({
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const t = getTemplateBySlug(slug);
-  if (!t) return { title: "Template Not Found | Zedu" };
-  const title = `${t.title} Workspace Template | Zedu`;
+  if (!t) return { title: "Template Not Found" };
+  const title = `${t.title} Workspace Template`;
   return {
     title,
     description: `${t.description} Includes #${t.channels.slice(0, 3).join(", #")}.`,
