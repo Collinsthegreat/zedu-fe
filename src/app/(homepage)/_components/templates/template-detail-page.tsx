@@ -30,7 +30,10 @@ export const generateStaticParams = () =>
 export default async function TemplateDetailPage({ params }: PageProps) {
   const { slug } = await params;
   const t = getTemplateBySlug(slug);
-  if (!t) notFound();
+  if (!t) {
+    notFound();
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-[#070B14] text-slate-100 px-4 py-12 sm:px-6 lg:px-8">
