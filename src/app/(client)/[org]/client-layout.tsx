@@ -38,6 +38,7 @@ import ErrorState, {
   ErrorStateVariant,
   errorVariantFromStatus,
 } from "~/components/ui/error-state";
+import usePageTitle from "~/hooks/use-page-title";
 
 const ClientLayout = ({
   children,
@@ -48,6 +49,7 @@ const ClientLayout = ({
   const [orgError, setOrgError] = useState<ErrorStateVariant | null>(null);
   const { state, dispatch } = useContext(DataContext);
   const pathname = usePathname();
+  usePageTitle(pathname);
   const prevPathnameRef = useRef<string | null>(null);
   const segments = pathname.split("/");
   const slug = segments[1];
