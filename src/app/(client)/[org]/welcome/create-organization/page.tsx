@@ -147,6 +147,24 @@ const CreateOrganization: React.FC = () => {
   };
 
   /**
+   * Sends the onboarding completion webhook for the created organization.
+   * @param message Optional message from the organization creation response.
+   */
+  const sendOnboardingWebhook = (message?: string) => {
+    const webhookData = `
+      Organisation Name: ${values.organisationName} \n
+      Organisation Type: ${values.organisationType} \n
+      Country: ${country?.value || ""}
+      `;
+    RegisterWebhookRequest(
+      webhookData,
+      "User Completed Onboarding",
+      message,
+      "success"
+    );
+  };
+
+  /**
    * Handles form submission to create an organization and provision template channels.
    * @param event Form submission event.
    */
@@ -170,6 +188,7 @@ const CreateOrganization: React.FC = () => {
         return;
       }
 
+      sendOnboardingWebhook();
       await switchToOrganisation(createdOrg, token);
       return;
     }
@@ -202,18 +221,7 @@ const CreateOrganization: React.FC = () => {
         return;
       }
 
-      // send webhook
-      const webhookData = `
-      Organisation Name: ${values.organisationName} \n
-      Organisation Type: ${values.organisationType} \n
-      Country: ${country.value}
-      `;
-      RegisterWebhookRequest(
-        webhookData,
-        "User Completed Onboarding",
-        res?.data?.message,
-        "success"
-      );
+      sendOnboardingWebhook(res?.data?.message);
 
       // Switch into the new organisation so the user lands there rather than
       // the auto-created default (pattern from organization/create/page.tsx).

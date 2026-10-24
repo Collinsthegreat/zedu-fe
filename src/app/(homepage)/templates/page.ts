@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ogImageUrl } from "~/lib/env-urls";
 
 export { default } from "../_components/templates/templates-page";
 
@@ -13,5 +14,13 @@ export const metadata: Metadata = {
     description: "Pre-configured cohort workspaces and channel presets.",
     url: "/templates",
     siteName: "Zedu",
+    images: [
+      {
+        url: ogImageUrl("og-image-5.png"),
+        width: 1200,
+        height: 630,
+        alt: "Zedu learning platform for educators and cohorts",
+      },
+    ],
   },
 };
