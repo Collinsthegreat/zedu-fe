@@ -160,7 +160,10 @@ const UserSidebar = () => {
                 <span className="text-sm text-[#6868F7]">{user?.phone}</span>
                 {/* <span className="text-sm text-[#667085]">whatsapp only</span> */}
               </div>
-              <CopyToClipboardWithTooltip textToCopy={user?.phone}>
+              <CopyToClipboardWithTooltip
+                textToCopy={user?.phone}
+                label="Copy phone number"
+              >
                 <CopyIcon />
               </CopyToClipboardWithTooltip>
             </div>
@@ -173,6 +176,7 @@ const UserSidebar = () => {
               <CopyToClipboardWithTooltip
                 textToCopy={user?.email}
                 tooltipText="Email copied!"
+                label="Copy email"
               >
                 <CopyIcon />
               </CopyToClipboardWithTooltip>
