@@ -1,5 +1,5 @@
 "use client";
-
+import { isValidEmail } from "~/lib/utils";
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -132,7 +132,7 @@ const Footer = () => {
 
     setError("");
 
-    if (!validateEmail(email)) {
+    if (!isValidEmail(email)) {
       setError("Please enter a valid email address.");
       return;
     }
@@ -196,10 +196,7 @@ const Footer = () => {
     }
   };
 
-  const validateEmail = (email: string) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(String(email).toLowerCase());
-  };
+  //
 
   return (
     <footer className="flex flex-col bg-[#303073] text-[#fafafa] px-6">
