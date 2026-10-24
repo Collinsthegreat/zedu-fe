@@ -20,6 +20,11 @@ import { contactSalesUrl } from "~/lib/env-urls";
 
 const phoneNumberPattern = /^\+?[0-9\s()-]+$/;
 
+/**
+ * Extracts only digits from a phone number string.
+ * @param value Raw phone number input.
+ * @returns String containing only numeric digits.
+ */
 const getPhoneDigits = (value: string) => value.replace(/\D/g, "");
 
 const contactSalesSchema = z.object({
@@ -68,6 +73,12 @@ const initialFormData: ContactSalesFormData = {
   message: "",
 };
 
+/**
+ * Validates a single form field value using the Zod schema.
+ * @param field Form field key to validate.
+ * @param value Current field value.
+ * @returns Error message string, or empty string if valid.
+ */
 const getFieldError = (field: FormField, value: string) => {
   const result = contactSalesSchema.shape[field].safeParse(value);
   return result.success
@@ -75,6 +86,11 @@ const getFieldError = (field: FormField, value: string) => {
     : result.error.issues[0]?.message || "Invalid value";
 };
 
+/**
+ * Validates the entire contact sales form dataset.
+ * @param data Form data object to validate.
+ * @returns Map of field names to error messages.
+ */
 const getFormErrors = (data: ContactSalesFormData): FormErrors => {
   const parsed = contactSalesSchema.safeParse(data);
 
@@ -97,6 +113,10 @@ const getFormErrors = (data: ContactSalesFormData): FormErrors => {
 const fieldClassName =
   "h-[52px] rounded-[14px] border border-[#6f4ef6]/25 bg-white px-3.5 text-[#222] focus:border-[#6f4ef6] focus:ring-2 focus:ring-[#6f4ef6]/30";
 
+/**
+ * Interactive contact sales form supporting organization type and phone validation.
+ * @returns Rendered contact sales form component.
+ */
 export const ContactSalesForm = () => {
   const [formData, setFormData] =
     useState<ContactSalesFormData>(initialFormData);
@@ -104,6 +124,11 @@ export const ContactSalesForm = () => {
   const [sending, setSending] = useState<boolean>(false);
   const { toast } = useToast();
 
+  /**
+   * Updates a form field value in state and clears active errors when resolved.
+   * @param field Field name.
+   * @param value New field value.
+   */
   const updateField = (field: FormField, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
 
@@ -115,6 +140,10 @@ export const ContactSalesForm = () => {
     }
   };
 
+  /**
+   * Validates a single field on blur and updates error state.
+   * @param field Field name to validate.
+   */
   const validateField = (field: FormField) => {
     setErrors((prev) => ({
       ...prev,
@@ -122,6 +151,10 @@ export const ContactSalesForm = () => {
     }));
   };
 
+  /**
+   * Submits the contact sales form data to the sales endpoint.
+   * @param event Form submit event.
+   */
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 

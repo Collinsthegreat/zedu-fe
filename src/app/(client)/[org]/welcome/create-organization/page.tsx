@@ -20,8 +20,10 @@ import {
   resolveChannelIdForOrgSwitch,
 } from "~/utils/org-switch";
 
-// The backend auto-creates a workspace at signup, so onboard-status can be
-// true before the user has chosen one. A missing type is never default.
+/**
+ * Determines whether the user's active organization was auto-created by the backend.
+ * @returns True if the active organization type matches the default workspace indicator.
+ */
 const isAutoCreatedOrg = () => {
   try {
     const user = JSON.parse(localStorage.getItem("user") || "null");
@@ -38,7 +40,10 @@ const initialState = {
   organisationType: "",
 };
 
-/** Onboarding view allowing newly registered users to create their initial organization. */
+/**
+ * Onboarding view allowing newly registered users to create their initial organization.
+ * @returns Organization creation page component.
+ */
 const CreateOrganization: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -78,13 +83,19 @@ const CreateOrganization: React.FC = () => {
     setCountries(response);
   }, []);
 
+  /**
+   * Updates organization form field state on input change.
+   * @param event Input change event.
+   */
   const handleChange = (event: any) => {
     const { name, value } = event.target;
     setValues({ ...values, [name]: value });
   };
 
-  // Keep the user's stored org current so the welcome pages stop treating
-  // them as still on the auto-created workspace.
+  /**
+   * Updates stored organization properties on the local user object.
+   * @param organisation Updated organization data to merge.
+   */
   const storeCurrentOrganisation = (organisation: any) => {
     if (!organisation) return;
     try {
@@ -97,7 +108,11 @@ const CreateOrganization: React.FC = () => {
     }
   };
 
-  // Switching can fail after the org exists; a retry only repeats the switch.
+  /**
+   * Switches user context to the newly created organization and handles routing.
+   * @param target Target organization record.
+   * @param token Authorization bearer token.
+   */
   const switchToOrganisation = async (target: any, token: string) => {
     const result = await PutRequest(
       "/users/switch-org",
@@ -131,6 +146,10 @@ const CreateOrganization: React.FC = () => {
     redirectAfterOrgSwitch(slug, channelId);
   };
 
+  /**
+   * Handles form submission to create an organization and provision template channels.
+   * @param event Form submission event.
+   */
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
@@ -157,11 +176,18 @@ const CreateOrganization: React.FC = () => {
 
       const newOrg = res?.data?.data;
       localStorage.setItem("orgId", newOrg?.id);
-      await provisionTemplateChannels(
+      const provisioned = await provisionTemplateChannels(
         newOrg?.id,
         searchParams.get("template"),
         token
       );
+
+      if (!provisioned) {
+        showError("Failed to set up template channels. Please try again.");
+        setButtonloding(false);
+        return;
+      }
+
       setCreatedOrg(newOrg);
 
       // send webhook

@@ -7,7 +7,11 @@ import type { Metadata } from "next";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
-/** Generates dynamic metadata for a template detail page. */
+/**
+ * Generates dynamic metadata for a template detail page.
+ * @param props Route properties containing page params promise.
+ * @returns Metadata object for the template route.
+ */
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
@@ -22,11 +26,18 @@ export async function generateMetadata({
   };
 }
 
-/** Pre-renders static route parameters for template presets. */
+/**
+ * Pre-renders static route parameters for template presets.
+ * @returns Array of route parameter objects for static generation.
+ */
 export const generateStaticParams = () =>
   TEMPLATES.map((t) => ({ slug: t.slug }));
 
-/** Detail view displaying channel architecture and AI assistant configurations. */
+/**
+ * Detail view displaying channel architecture and AI assistant configurations.
+ * @param props Route properties containing page params promise.
+ * @returns Rendered template detail page or notFound.
+ */
 export default async function TemplateDetailPage({ params }: PageProps) {
   const { slug } = await params;
   const t = getTemplateBySlug(slug);

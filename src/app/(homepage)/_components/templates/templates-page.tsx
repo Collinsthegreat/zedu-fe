@@ -5,7 +5,10 @@ import Link from "next/link";
 import { Search, ArrowRight } from "lucide-react";
 import { TEMPLATES, TEMPLATE_CATEGORIES } from "~/data/templates";
 
-/** Directory page for browsing and searching community cohort templates. */
+/**
+ * Directory page for browsing and searching community cohort templates.
+ * @returns Rendered template directory page component.
+ */
 export default function TemplatesPage() {
   const [activeCategory, setActiveCategory] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState<string>("");

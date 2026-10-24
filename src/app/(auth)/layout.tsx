@@ -4,7 +4,21 @@ import { useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
 import { DataContext, DataProvider } from "~/store/GlobalState";
 
-/** Resolves the logged-in destination path, preserving template query param for un-onboarded users. */
+/**
+ * Determines whether an organization was auto-created by the backend during signup.
+ * @param type The organization type designation string.
+ * @returns True if type matches the auto-created default workspace indicator.
+ */
+const isAutoCreatedOrg = (type?: string) =>
+  (type ?? "").trim().toLowerCase() === "user default org";
+
+/**
+ * Resolves the logged-in destination path, preserving template query param for un-onboarded users
+ * or users on an auto-created workspace.
+ * @param orgSlugFromState Organization slug available in GlobalState context.
+ * @param template Optional template slug passed in query parameters.
+ * @returns Destination URL string or null if organization slug is unresolved.
+ */
 function getLoggedInRedirectPath(
   orgSlugFromState?: string,
   template?: string | null
@@ -13,6 +27,7 @@ function getLoggedInRedirectPath(
   let user: {
     current_organisation_slug?: string;
     is_onboarded?: boolean;
+    organisation?: { type?: string };
   } | null = null;
 
   try {
@@ -28,12 +43,17 @@ function getLoggedInRedirectPath(
 
   const query = template ? `?template=${encodeURIComponent(template)}` : "";
 
-  return user?.is_onboarded === false
+  return user?.is_onboarded === false ||
+    isAutoCreatedOrg(user?.organisation?.type)
     ? `/${orgSlug}/welcome${query}`
     : `/${orgSlug}`;
 }
 
-/** Root authentication layout providing OAuth context and onboarding redirects. */
+/**
+ * Root authentication layout providing OAuth context and onboarding redirects.
+ * @param props Layout component properties containing child elements.
+ * @returns Rendered authentication layout tree.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

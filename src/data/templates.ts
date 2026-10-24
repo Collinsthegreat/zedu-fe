@@ -41,7 +41,11 @@ export const TEMPLATES: TemplatePreset[] = PRESET_DATA.map((r) => {
   };
 });
 
-/** Retrieves a template preset by slug or normalized string. */
+/**
+ * Retrieves a template preset by slug or normalized string.
+ * @param slug The template slug identifier.
+ * @returns The matching template preset or undefined.
+ */
 export const getTemplateBySlug = (slug: string) =>
   TEMPLATES.find(
     (t) =>
@@ -49,18 +53,42 @@ export const getTemplateBySlug = (slug: string) =>
       t.slug.replace(/-/g, "") === slug?.toLowerCase().replace(/[^a-z0-9]/g, "")
   );
 
-/** Reads a key safely from localStorage in browser environments. */
+/**
+ * Filters templates by their category designation or returns all templates.
+ * @param category The category name to filter by, or "All".
+ * @returns Array of matching template presets.
+ */
+export const getTemplatesByCategory = (category: string) =>
+  category === "All"
+    ? TEMPLATES
+    : TEMPLATES.filter((t) => t.category === category);
+
+/**
+ * Reads a key safely from localStorage in browser environments.
+ * @param k The localStorage key to query.
+ * @returns The stored string value or null.
+ */
 const getStored = (k: string) =>
   typeof window !== "undefined" ? localStorage.getItem(k) : null;
 
-/** Provisions template channels for an organization via parallel API requests. */
+/**
+ * Provisions template channels for an organization via parallel API requests.
+ * @param orgId The destination organization identifier.
+ * @param slug Optional template slug to override stored selection.
+ * @param token Optional auth token for request authentication.
+ * @returns True if all channels were created or already existed; false otherwise.
+ */
 export async function provisionTemplateChannels(
   orgId: string,
   slug?: string | null,
   token?: string
 ): Promise<boolean> {
-  const t =
-    orgId && getTemplateBySlug(slug || getStored("selected_template") || "");
+  const targetSlug = slug || getStored("selected_template");
+  if (!targetSlug) {
+    return true;
+  }
+
+  const t = orgId && getTemplateBySlug(targetSlug);
   if (!t) {
     if (typeof window !== "undefined" && getStored("selected_template")) {
       localStorage.removeItem("selected_template");
@@ -75,16 +103,29 @@ export async function provisionTemplateChannels(
     u = {};
   }
   const Username = u?.username || u?.email;
+
+  /**
+   * Formats the channel payload for the channel creation endpoint.
+   * @param n Raw channel name.
+   * @returns Channel creation request object.
+   */
   const payload = (n: string) => ({
     name: n.replace(/^#/, ""),
     organisation_id: orgId,
     is_private: false,
     Username,
   });
+
   try {
     const results = await Promise.all(
       t.channels.map((n) => PostRequest("/channels", payload(n), auth))
     );
+
+    /**
+     * Verifies whether an API response indicates success or conflict (already provisioned).
+     * @param res API response candidate.
+     * @returns True if response status code indicates success or conflict.
+     */
     const isSuccessOrConflict = (res: any) =>
       res &&
       (res.status === 200 ||
@@ -94,14 +135,16 @@ export async function provisionTemplateChannels(
         res?.data?.status_code === 201 ||
         res?.data?.status_code === 409);
 
-    const hasSuccess =
+    const allSucceeded =
       results.length > 0 &&
-      results.some((res: any) => isSuccessOrConflict(res));
+      results.every((res: any) => isSuccessOrConflict(res));
 
-    return hasSuccess;
-  } finally {
-    if (typeof window !== "undefined") {
+    if (allSucceeded && typeof window !== "undefined") {
       localStorage.removeItem("selected_template");
     }
+
+    return allSucceeded;
+  } catch {
+    return false;
   }
 }

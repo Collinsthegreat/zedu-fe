@@ -1,3 +1,6 @@
+/**
+ * Route handler re-exporting the template detail page, metadata generator, and static params.
+ */
 export {
   default,
   generateMetadata,

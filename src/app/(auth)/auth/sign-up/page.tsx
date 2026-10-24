@@ -19,11 +19,18 @@ import {
   isPasswordTooShort,
 } from "~/lib/password";
 
-/** User registration page supporting email/password, Google, Apple auth, and template onboarding. */
-// The backend auto-creates a workspace at signup, so `is_onboarded` being
-// true does not mean the user ever chose one. A missing type is never default.
+/**
+ * Determines whether an organization was auto-created by the backend during signup.
+ * @param type The organization type designation string.
+ * @returns True if type matches the auto-created default workspace indicator.
+ */
 const isAutoCreatedOrg = (type?: string) =>
   (type ?? "").trim().toLowerCase() === "user default org";
+
+/**
+ * User registration page supporting email/password, Google, Apple auth, and template onboarding.
+ * @returns Rendered sign-up component.
+ */
 function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -45,9 +52,19 @@ function SignUp() {
     (typeof window !== "undefined"
       ? localStorage.getItem("selected_template")
       : null);
+
+  /**
+   * Constructs destination route to the welcome flow preserving any template param.
+   * @param slug Organization slug identifier.
+   * @returns Route path string.
+   */
   const toWelcome = (slug: string) =>
     `/${slug}/welcome${tmpl ? `?template=${tmpl}` : ""}`;
-  // Apple Login handler
+
+  /**
+   * Handles successful Apple authentication credential callback.
+   * @param response Apple authentication response payload.
+   */
   const handleAppleSuccess = async (response: any) => {
     setAppleLoading(true);
     try {

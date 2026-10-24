@@ -6,8 +6,10 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { GetRequest } from "~/utils/request";
 import { DataContext } from "~/store/GlobalState";
 
-// The backend auto-creates a workspace at signup, so onboard-status can be
-// true before the user has chosen one. A missing type is never default.
+/**
+ * Determines whether the user's active organization was auto-created by the backend.
+ * @returns True if the active organization type matches the default workspace indicator.
+ */
 const isAutoCreatedOrg = () => {
   try {
     const user = JSON.parse(localStorage.getItem("user") || "null");
