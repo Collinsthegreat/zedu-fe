@@ -59,7 +59,12 @@ export default function GeneralNotificationConnection() {
 
   // centrifugo connection for notification
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    let user: { id?: string; user_id?: string } | null = null;
+    try {
+      user = JSON.parse(localStorage.getItem("user") || "{}");
+    } catch {
+      return;
+    }
     if (!orgId || !user?.id) return;
 
     const channel = `${orgId}/${user.id}`;
