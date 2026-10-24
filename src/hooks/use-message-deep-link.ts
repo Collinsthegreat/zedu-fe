@@ -166,8 +166,10 @@ export function useMessageDeepLink({
           type: ACTIONS.LOAD_THREAD,
           payload: !loadThreadRef.current,
         });
+        // Mark applied only after opening the placeholder thread for child replies.
+        // Thread-only links remain unapplied so the effect retries when parent loads.
+        appliedRef.current = signature;
       }
-      appliedRef.current = signature;
     }
   }, [channelId, threadId, messageId, messages, loading, dispatch]);
 }

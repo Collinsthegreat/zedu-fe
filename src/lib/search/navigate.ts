@@ -24,23 +24,6 @@ type ReplyReference = {
   message_id?: string | number;
 };
 
-type ThreadReference = {
-  thread_id?: string;
-};
-
-export function resolveSearchDeepLink<T extends ThreadReference>(
-  threadId: string,
-  messageId: string | null,
-  messages: T[],
-  loading: boolean
-): { status: "pending" } | { status: "root" } | { status: "reply"; parent: T } {
-  if (!messageId) return { status: "root" };
-  if (loading) return { status: "pending" };
-
-  const parent = messages.find((message) => message.thread_id === threadId);
-  return parent ? { status: "reply", parent } : { status: "pending" };
-}
-
 export function hasMoreReplyPages(pageLength: number, pageSize = 30) {
   return pageLength >= pageSize;
 }
