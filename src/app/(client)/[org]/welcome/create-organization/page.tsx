@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import Loading from "~/components/ui/loading";
@@ -55,6 +55,7 @@ const CreateOrganization: React.FC = () => {
   const { firstChannel } = useFirstChannel();
   const { org } = useParams<{ org: string }>();
   const [createdOrg, setCreatedOrg] = useState<any>(null);
+  const hasSentOnboardingWebhook = useRef(false);
 
   // check if a user is onboarded
   useEffect(() => {
@@ -148,9 +149,13 @@ const CreateOrganization: React.FC = () => {
 
   /**
    * Sends the onboarding completion webhook for the created organization.
+   * Ensures the webhook is dispatched at most once per onboarding session.
    * @param message Optional message from the organization creation response.
    */
   const sendOnboardingWebhook = (message?: string) => {
+    if (hasSentOnboardingWebhook.current) return;
+    hasSentOnboardingWebhook.current = true;
+
     const webhookData = `
       Organisation Name: ${values.organisationName} \n
       Organisation Type: ${values.organisationType} \n
@@ -161,7 +166,9 @@ const CreateOrganization: React.FC = () => {
       "User Completed Onboarding",
       message,
       "success"
-    );
+    ).catch((error) => {
+      console.error("Failed to send onboarding webhook", error);
+    });
   };
 
   /**
