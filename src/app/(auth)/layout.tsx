@@ -4,13 +4,7 @@ import { useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
 import { DataContext, DataProvider } from "~/store/GlobalState";
 
-/**
- * Determines whether an organization was auto-created by the backend during signup.
- * @param type The organization type designation string.
- * @returns True if type matches the auto-created default workspace indicator.
- */
-const isAutoCreatedOrg = (type?: string) =>
-  (type ?? "").trim().toLowerCase() === "user default org";
+import { isAutoCreatedOrg } from "~/utils/organisation";
 
 /**
  * Resolves the logged-in destination path, preserving template query param for un-onboarded users
@@ -27,13 +21,27 @@ function getLoggedInRedirectPath(
   let user: {
     current_organisation_slug?: string;
     is_onboarded?: boolean;
-    organisation?: { type?: string };
+    organisation?: { type?: string; slug?: string };
+    organisations?: Array<{ slug?: string; type?: string }>;
   } | null = null;
 
   try {
     user = JSON.parse(localStorage.getItem("user") || "null");
   } catch {
     user = null;
+  }
+
+  let organisations: Array<{ slug?: string; type?: string }> = [];
+  try {
+    const rawOrgs = localStorage.getItem("organisations");
+    if (rawOrgs) {
+      organisations = JSON.parse(rawOrgs);
+    }
+  } catch {
+    organisations = [];
+  }
+  if (!organisations?.length && user?.organisations?.length) {
+    organisations = user.organisations;
   }
 
   const orgSlug =
@@ -43,9 +51,16 @@ function getLoggedInRedirectPath(
 
   const query = template ? `?template=${encodeURIComponent(template)}` : "";
 
+  const matchingFromList = organisations?.find((o) => o?.slug === orgSlug);
+  const resolvedOrg =
+    matchingFromList ||
+    (user?.organisation?.slug === orgSlug || !organisations?.length
+      ? user?.organisation
+      : undefined);
+
   const needsOnboarding =
     user?.is_onboarded === false ||
-    (Boolean(template) && isAutoCreatedOrg(user?.organisation?.type));
+    (Boolean(template) && isAutoCreatedOrg(resolvedOrg?.type));
 
   return needsOnboarding ? `/${orgSlug}/welcome${query}` : `/${orgSlug}`;
 }

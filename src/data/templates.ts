@@ -1,4 +1,4 @@
-import { PostRequest } from "~/utils/request";
+import axios from "axios";
 
 export interface TemplatePreset {
   slug: string;
@@ -42,16 +42,14 @@ export const TEMPLATES: TemplatePreset[] = PRESET_DATA.map((r) => {
 });
 
 /**
- * Retrieves a template preset by slug or normalized string.
+ * Retrieves a template preset by exact canonical slug.
  * @param slug The template slug identifier.
  * @returns The matching template preset or undefined.
  */
-export const getTemplateBySlug = (slug: string) =>
-  TEMPLATES.find(
-    (t) =>
-      t.slug === slug ||
-      t.slug.replace(/-/g, "") === slug?.toLowerCase().replace(/[^a-z0-9]/g, "")
-  );
+export function getTemplateBySlug(slug: string): TemplatePreset | undefined {
+  if (!slug) return undefined;
+  return TEMPLATES.find((t) => t.slug === slug);
+}
 
 /**
  * Reads a key safely from localStorage in browser environments.
@@ -63,6 +61,7 @@ const getStored = (k: string) =>
 
 /**
  * Provisions template channels for an organization via parallel API requests.
+ * Direct axios requests are used to prevent per-channel error toast popups on non-2xx codes.
  * @param orgId The destination organization identifier.
  * @param slug Optional template slug to override stored selection.
  * @param token Optional auth token for request authentication.
@@ -73,19 +72,33 @@ export async function provisionTemplateChannels(
   slug?: string | null,
   token?: string
 ): Promise<boolean> {
-  const targetSlug = slug || getStored("selected_template");
-  if (!targetSlug) {
+  const rawSlug = slug || getStored("selected_template");
+  if (!rawSlug) {
     return true;
   }
 
-  const t = orgId && getTemplateBySlug(targetSlug);
+  const normalizedSlug = rawSlug.trim().toLowerCase();
+  const t =
+    orgId &&
+    (getTemplateBySlug(rawSlug) ||
+      getTemplateBySlug(normalizedSlug) ||
+      TEMPLATES.find((p) => p.slug === normalizedSlug));
+
   if (!t) {
     if (typeof window !== "undefined") {
       localStorage.removeItem("selected_template");
     }
     return true;
   }
+
   const auth = token || getStored("token") || "";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BASE_URL;
+
+  if (!auth || !baseUrl) {
+    return false;
+  }
+
   let u: any = {};
   try {
     u = JSON.parse(getStored("user") || "{}");
@@ -108,7 +121,20 @@ export async function provisionTemplateChannels(
 
   try {
     const results = await Promise.all(
-      t.channels.map((n) => PostRequest("/channels", payload(n), auth))
+      t.channels.map(async (n) => {
+        try {
+          const res = await axios.post(`${baseUrl}/channels`, payload(n), {
+            headers: {
+              Authorization: `Bearer ${auth}`,
+              "Content-Type": "application/json",
+            },
+            validateStatus: () => true,
+          });
+          return res;
+        } catch (error) {
+          return { status: 500, error };
+        }
+      })
     );
 
     /**
@@ -117,13 +143,15 @@ export async function provisionTemplateChannels(
      * @returns True if response status code indicates success or conflict.
      */
     const isSuccessOrConflict = (res: any) =>
-      res &&
-      (res.status === 200 ||
-        res.status === 201 ||
-        res.status === 409 ||
-        res?.data?.status_code === 200 ||
-        res?.data?.status_code === 201 ||
-        res?.data?.status_code === 409);
+      Boolean(
+        res &&
+        (res.status === 200 ||
+          res.status === 201 ||
+          res.status === 409 ||
+          res?.data?.status_code === 200 ||
+          res?.data?.status_code === 201 ||
+          res?.data?.status_code === 409)
+      );
 
     const allSucceeded =
       results.length > 0 &&

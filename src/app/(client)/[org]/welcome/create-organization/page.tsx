@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import Loading from "~/components/ui/loading";
@@ -12,7 +12,6 @@ import CustomSelect from "~/components/ui/custom-select";
 import useFirstChannel from "../../home/channels/hooks/first-channel";
 import StepIndicator from "~/components/ui/step-indicator";
 import { RegisterWebhookRequest } from "~/utils/webhook-request";
-import { DataContext } from "~/store/GlobalState";
 import { provisionTemplateChannels } from "~/data/templates";
 import { showError } from "~/components/toast/sonner";
 import {
@@ -20,19 +19,7 @@ import {
   resolveChannelIdForOrgSwitch,
 } from "~/utils/org-switch";
 
-/**
- * Determines whether the user's active organization was auto-created by the backend.
- * @returns True if the active organization type matches the default workspace indicator.
- */
-const isAutoCreatedOrg = () => {
-  try {
-    const user = JSON.parse(localStorage.getItem("user") || "null");
-    const type = user?.organisation?.type ?? "";
-    return type.trim().toLowerCase() === "user default org";
-  } catch {
-    return false;
-  }
-};
+import { isAutoCreatedOrg } from "~/utils/organisation";
 
 // initial states
 const initialState = {
@@ -167,6 +154,7 @@ const CreateOrganization: React.FC = () => {
       message,
       "success"
     ).catch((error) => {
+      hasSentOnboardingWebhook.current = false;
       console.error("Failed to send onboarding webhook", error);
     });
   };

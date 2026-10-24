@@ -19,13 +19,7 @@ import {
   isPasswordTooShort,
 } from "~/lib/password";
 
-/**
- * Determines whether an organization was auto-created by the backend during signup.
- * @param type The organization type designation string.
- * @returns True if type matches the auto-created default workspace indicator.
- */
-const isAutoCreatedOrg = (type?: string) =>
-  (type ?? "").trim().toLowerCase() === "user default org";
+import { isAutoCreatedOrg } from "~/utils/organisation";
 
 /**
  * User registration page supporting email/password, Google, Apple auth, and template onboarding.
@@ -47,19 +41,17 @@ function SignUp() {
   const [loading, setLoading] = useState(false);
   const [googleloading, setGoogleloading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
-  const tmpl =
-    searchParams.get("template") ||
-    (typeof window !== "undefined"
-      ? localStorage.getItem("selected_template")
-      : null);
-
   /**
    * Constructs destination route to the welcome flow preserving any template param.
    * @param slug Organization slug identifier.
    * @returns Route path string.
    */
-  const toWelcome = (slug: string) =>
-    `/${slug}/welcome${tmpl ? `?template=${tmpl}` : ""}`;
+  const toWelcome = (slug: string) => {
+    const tmpl = searchParams.get("template")?.trim();
+    return tmpl
+      ? `/${slug}/welcome?template=${encodeURIComponent(tmpl)}`
+      : `/${slug}/welcome`;
+  };
 
   /**
    * Handles successful Apple authentication credential callback.
@@ -126,9 +118,11 @@ function SignUp() {
     if (inviteEmail) {
       setEmail(inviteEmail.trim());
     }
-    const template = searchParams.get("template");
+    const template = searchParams.get("template")?.trim();
     if (template) {
       localStorage.setItem("selected_template", template);
+    } else {
+      localStorage.removeItem("selected_template");
     }
   }, [searchParams]);
 

@@ -6,19 +6,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { GetRequest } from "~/utils/request";
 import { DataContext } from "~/store/GlobalState";
 
-/**
- * Determines whether the user's active organization was auto-created by the backend.
- * @returns True if the active organization type matches the default workspace indicator.
- */
-const isAutoCreatedOrg = () => {
-  try {
-    const user = JSON.parse(localStorage.getItem("user") || "null");
-    const type = user?.organisation?.type ?? "";
-    return type.trim().toLowerCase() === "user default org";
-  } catch {
-    return false;
-  }
-};
+import { isAutoCreatedOrg } from "~/utils/organisation";
 
 /** Welcome onboarding view allowing user to initiate organization creation. */
 const Welcome = () => {

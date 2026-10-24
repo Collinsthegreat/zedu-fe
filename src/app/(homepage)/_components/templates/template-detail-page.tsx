@@ -26,7 +26,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description: template.description,
-      url: `/templates/${slug}`,
+      url: `/templates/${template.slug}`,
       siteName: "Zedu",
       images: [
         {
