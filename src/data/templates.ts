@@ -54,16 +54,6 @@ export const getTemplateBySlug = (slug: string) =>
   );
 
 /**
- * Filters templates by their category designation or returns all templates.
- * @param category The category name to filter by, or "All".
- * @returns Array of matching template presets.
- */
-export const getTemplatesByCategory = (category: string) =>
-  category === "All"
-    ? TEMPLATES
-    : TEMPLATES.filter((t) => t.category === category);
-
-/**
  * Reads a key safely from localStorage in browser environments.
  * @param k The localStorage key to query.
  * @returns The stored string value or null.
@@ -90,10 +80,10 @@ export async function provisionTemplateChannels(
 
   const t = orgId && getTemplateBySlug(targetSlug);
   if (!t) {
-    if (typeof window !== "undefined" && getStored("selected_template")) {
+    if (typeof window !== "undefined") {
       localStorage.removeItem("selected_template");
     }
-    return false;
+    return true;
   }
   const auth = token || getStored("token") || "";
   let u: any = {};

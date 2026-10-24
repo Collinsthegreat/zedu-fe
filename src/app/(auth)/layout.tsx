@@ -43,10 +43,11 @@ function getLoggedInRedirectPath(
 
   const query = template ? `?template=${encodeURIComponent(template)}` : "";
 
-  return user?.is_onboarded === false ||
-    isAutoCreatedOrg(user?.organisation?.type)
-    ? `/${orgSlug}/welcome${query}`
-    : `/${orgSlug}`;
+  const needsOnboarding =
+    user?.is_onboarded === false ||
+    (Boolean(template) && isAutoCreatedOrg(user?.organisation?.type));
+
+  return needsOnboarding ? `/${orgSlug}/welcome${query}` : `/${orgSlug}`;
 }
 
 /**

@@ -158,6 +158,18 @@ const CreateOrganization: React.FC = () => {
     setButtonloding(true);
 
     if (createdOrg?.id) {
+      const provisioned = await provisionTemplateChannels(
+        createdOrg.id,
+        searchParams.get("template"),
+        token
+      );
+
+      if (!provisioned) {
+        showError("Failed to set up template channels. Please try again.");
+        setButtonloding(false);
+        return;
+      }
+
       await switchToOrganisation(createdOrg, token);
       return;
     }
@@ -176,6 +188,8 @@ const CreateOrganization: React.FC = () => {
 
       const newOrg = res?.data?.data;
       localStorage.setItem("orgId", newOrg?.id);
+      setCreatedOrg(newOrg);
+
       const provisioned = await provisionTemplateChannels(
         newOrg?.id,
         searchParams.get("template"),
@@ -187,8 +201,6 @@ const CreateOrganization: React.FC = () => {
         setButtonloding(false);
         return;
       }
-
-      setCreatedOrg(newOrg);
 
       // send webhook
       const webhookData = `
