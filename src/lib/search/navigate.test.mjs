@@ -5,6 +5,7 @@ const {
   hasMoreReplyPages,
   isIndividualDmType: isDm,
   openSearchMessageResult,
+  resolveSearchDeepLink,
   shouldFetchSearchReply,
 } = await import("./navigate.ts");
 
@@ -81,4 +82,12 @@ test("loads reply pages only while a search target is missing", () => {
     ],
     [true, false, false, true, false]
   );
+});
+test("keeps a reply link pending until its parent finishes loading", () => {
+  const parent = { thread_id: "parent-1" };
+  const resolve = (messages, loading) =>
+    resolveSearchDeepLink("parent-1", "reply-9", messages, loading);
+  assert.equal(resolve([parent], true).status, "pending");
+  assert.equal(resolve([], false).status, "pending");
+  assert.deepEqual(resolve([parent], false), { status: "reply", parent });
 });
