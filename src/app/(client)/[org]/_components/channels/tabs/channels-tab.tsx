@@ -21,12 +21,14 @@ import { Channel } from "~/types/channel";
 import { PostRequest } from "~/utils/new-request";
 import Loading from "~/components/ui/loading";
 
+const CHANNELS_TIP_DISMISSED_KEY = "channelsTipDismissed";
+let channelsTipDismissedInMemory = false;
+
 /**
  * Directories → Channels tab: lists the organisation's channels with search,
  * filters and sorting, and lets the user open or join a channel.
  */
 export default function ChannelsTab() {
-  const CHANNELS_TIP_DISMISSED_KEY = "channelsTipDismissed";
   const { state, dispatch } = useContext(DataContext);
   const { allChannels, channelloading, orgSlug } = state;
   const router = useRouter();
@@ -85,16 +87,18 @@ export default function ChannelsTab() {
   useEffect(() => {
     // localStorage can throw (e.g. blocked storage); fall back to showing the tip.
     try {
-      setShowBanner(
-        localStorage.getItem(CHANNELS_TIP_DISMISSED_KEY) !== "true"
-      );
+      const isDismissed =
+        localStorage.getItem(CHANNELS_TIP_DISMISSED_KEY) === "true" ||
+        channelsTipDismissedInMemory;
+      setShowBanner(!isDismissed);
     } catch {
-      setShowBanner(true);
+      setShowBanner(!channelsTipDismissedInMemory);
     }
     setTipChecked(true);
   }, []);
 
   const dismissBanner = () => {
+    channelsTipDismissedInMemory = true;
     setShowBanner(false);
     try {
       localStorage.setItem(CHANNELS_TIP_DISMISSED_KEY, "true");

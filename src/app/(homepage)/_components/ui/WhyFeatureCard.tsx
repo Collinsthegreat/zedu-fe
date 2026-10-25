@@ -29,9 +29,9 @@ export const WhyFeatureCard = ({
       >
         <Icon className="size-6" strokeWidth={2} />
       </span>
-      <h3 className="mb-3 text-xl font-bold leading-snug text-blue-500">
+      <h2 className="mb-3 text-xl font-bold leading-snug text-blue-500">
         {title}
-      </h3>
+      </h2>
       <p className="leading-relaxed text-neutral-600">{desc}</p>
       {cta}
     </article>

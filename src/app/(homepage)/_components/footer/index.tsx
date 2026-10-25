@@ -4,9 +4,8 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Plus_Jakarta_Sans } from "next/font/google";
-import { PostRequest } from "~/utils/new-request";
+import axios from "axios";
 import { showSuccess } from "~/components/toast/sonner";
-import { toast } from "sonner";
 import {
   appStoreUrl,
   facebookUrl,
@@ -120,6 +119,10 @@ const appStoreLinks = [
 
 const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ["latin"] });
 
+const newsletterClient = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_BASE_URL,
+});
+
 const Footer = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
@@ -140,56 +143,33 @@ const Footer = () => {
     setLoading(true);
 
     try {
-      const req = await PostRequest("/newsletter", { email });
+      const res = await newsletterClient.post("/newsletter", { email });
 
-      const status = req?.response?.status ?? req?.status;
-      const body = req?.response?.data ?? req?.data;
-
-      const isSuccess =
-        (status === 200 || status === 201) &&
-        status !== 409 &&
-        body?.status_code !== 409;
-
-      const isAlreadySubscribed = status === 409 || body?.status_code === 409;
-
-      if (isSuccess) {
+      if (res.status === 200 || res.status === 201) {
         setEmail("");
         setError("");
         showSuccess(
           "You're subscribed!",
           "Thanks for joining us. Stay tuned for the latest updates from Zedu."
         );
-      } else {
-        // Suppress the duplicate toast triggered inside PostRequest
-        toast.dismiss();
+      }
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        const status = err.response?.status;
+        const body = err.response?.data;
+        const isAlreadySubscribed = status === 409 || body?.status_code === 409;
 
         if (isAlreadySubscribed) {
-          setError(
-            "This email is already subscribed. Please try another email address."
-          );
+          setError("This email is already subscribed to our newsletter.");
         } else {
           setError(
             body?.message ||
-              "We couldn't subscribe you right now. Please try again."
+              err.message ||
+              "Something went wrong. Please try again."
           );
         }
-      }
-    } catch (error: any) {
-      toast.dismiss();
-      const status = error?.response?.status ?? error?.status;
-      const body = error?.response?.data ?? error?.data;
-      const isAlreadySubscribed = status === 409 || body?.status_code === 409;
-
-      if (isAlreadySubscribed) {
-        setError(
-          "This email is already subscribed. Please try another email address."
-        );
       } else {
-        setError(
-          body?.message ||
-            error?.message ||
-            "Something went wrong. Please try again."
-        );
+        setError("Something went wrong. Please try again.");
       }
     } finally {
       setLoading(false);
