@@ -20,6 +20,7 @@ export const metadata: Metadata = {
     description:
       "Built for modern learning: structured channels, AI-powered support, flexible education pricing, and tools that help educators run better cohorts.",
     url: "/",
+    siteName: "Zedu",
     images: [
       {
         url: ogImageUrl("og-image-5.png"),
@@ -28,6 +29,7 @@ export const metadata: Metadata = {
         alt: "Zedu - Learning Platform for Bootcamps, Schools, and Cohorts",
       },
     ],
+    type: "website",
   },
   alternates: {
     canonical: "/",

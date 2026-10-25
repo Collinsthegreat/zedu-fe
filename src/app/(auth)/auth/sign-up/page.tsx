@@ -539,6 +539,7 @@ function SignUp() {
             <Link
               href="/terms-of-service"
               target="_blank"
+              rel="noopener noreferrer"
               className="px-1 font-[500] leading-[21px] text-[#7141F8] hover:text-[#9678e8]"
             >
               terms of service
@@ -547,6 +548,7 @@ function SignUp() {
             <Link
               href="/policy"
               target="_blank"
+              rel="noopener noreferrer"
               className="px-1 font-[500] leading-[21px] text-[#7141F8] hover:text-[#9678e8]"
             >
               privacy policy
