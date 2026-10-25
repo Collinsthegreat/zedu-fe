@@ -4,11 +4,25 @@ import { useRouter } from "next/navigation";
 import React, { useContext, useEffect, useState } from "react";
 import { DataContext, DataProvider } from "~/store/GlobalState";
 
-function getLoggedInRedirectPath(orgSlugFromState?: string) {
+import { isAutoCreatedOrg } from "~/utils/organisation";
+
+/**
+ * Resolves the logged-in destination path, preserving template query param for un-onboarded users
+ * or users on an auto-created workspace.
+ * @param orgSlugFromState Organization slug available in GlobalState context.
+ * @param template Optional template slug passed in query parameters.
+ * @returns Destination URL string or null if organization slug is unresolved.
+ */
+function getLoggedInRedirectPath(
+  orgSlugFromState?: string,
+  template?: string | null
+) {
   const storedOrgSlug = localStorage.getItem("orgSlug") || "";
   let user: {
     current_organisation_slug?: string;
     is_onboarded?: boolean;
+    organisation?: { type?: string; slug?: string };
+    organisations?: Array<{ slug?: string; type?: string }>;
   } | null = null;
 
   try {
@@ -17,14 +31,45 @@ function getLoggedInRedirectPath(orgSlugFromState?: string) {
     user = null;
   }
 
+  let organisations: Array<{ slug?: string; type?: string }> = [];
+  try {
+    const rawOrgs = localStorage.getItem("organisations");
+    if (rawOrgs) {
+      organisations = JSON.parse(rawOrgs);
+    }
+  } catch {
+    organisations = [];
+  }
+  if (!organisations?.length && user?.organisations?.length) {
+    organisations = user.organisations;
+  }
+
   const orgSlug =
     orgSlugFromState || storedOrgSlug || user?.current_organisation_slug || "";
 
   if (!orgSlug) return null;
 
-  return user?.is_onboarded === false ? `/${orgSlug}/welcome` : `/${orgSlug}`;
+  const query = template ? `?template=${encodeURIComponent(template)}` : "";
+
+  const matchingFromList = organisations?.find((o) => o?.slug === orgSlug);
+  const resolvedOrg =
+    matchingFromList ||
+    (user?.organisation?.slug === orgSlug || !organisations?.length
+      ? user?.organisation
+      : undefined);
+
+  const needsOnboarding =
+    user?.is_onboarded === false ||
+    (Boolean(template) && isAutoCreatedOrg(resolvedOrg?.type));
+
+  return needsOnboarding ? `/${orgSlug}/welcome${query}` : `/${orgSlug}`;
 }
 
+/**
+ * Root authentication layout providing OAuth context and onboarding redirects.
+ * @param props Layout component properties containing child elements.
+ * @returns Rendered authentication layout tree.
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -36,15 +81,18 @@ export default function RootLayout({
   const { orgSlug } = state;
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      const redirectPath = getLoggedInRedirectPath(orgSlug);
-      if (redirectPath) {
-        router.replace(redirectPath);
-        return;
+    (async () => {
+      const t = new URLSearchParams(window.location.search).get("template");
+      if (t) {
+        localStorage.setItem("selected_template", t);
       }
-    }
-    setLoading(false);
+      const token = localStorage.getItem("token");
+      if (token) {
+        const r = getLoggedInRedirectPath(orgSlug, t);
+        if (r) return router.replace(r);
+      }
+      setLoading(false);
+    })();
   }, [orgSlug, router]);
 
   if (loading) return;

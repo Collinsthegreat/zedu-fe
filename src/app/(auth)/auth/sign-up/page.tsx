@@ -13,12 +13,18 @@ import { RegisterWebhookRequest } from "~/utils/webhook-request";
 import { Separator } from "~/components/ui/separator";
 import AppleSignin from "react-apple-signin-auth";
 import { Eye, EyeOff } from "lucide-react";
+import {
+  PASSWORD_HINT,
+  PASSWORD_TOO_SHORT_MESSAGE,
+  isPasswordTooShort,
+} from "~/lib/password";
 
-// The backend auto-creates a workspace at signup, so `is_onboarded` being
-// true does not mean the user ever chose one. A missing type is never default.
-const isAutoCreatedOrg = (type?: string) =>
-  (type ?? "").trim().toLowerCase() === "user default org";
+import { isAutoCreatedOrg } from "~/utils/organisation";
 
+/**
+ * User registration page supporting email/password, Google, Apple auth, and template onboarding.
+ * @returns Rendered sign-up component.
+ */
 function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,12 +38,25 @@ function SignUp() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [isMinLength, setIsMinLength] = useState(false);
-  const [isValidPassword, setIsValidPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleloading, setGoogleloading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
-  // Apple Login handler
+  /**
+   * Constructs destination route to the welcome flow preserving any template param.
+   * @param slug Organization slug identifier.
+   * @returns Route path string.
+   */
+  const toWelcome = (slug: string) => {
+    const tmpl = searchParams.get("template")?.trim();
+    return tmpl
+      ? `/${slug}/welcome?template=${encodeURIComponent(tmpl)}`
+      : `/${slug}/welcome`;
+  };
+
+  /**
+   * Handles successful Apple authentication credential callback.
+   * @param response Apple authentication response payload.
+   */
   const handleAppleSuccess = async (response: any) => {
     setAppleLoading(true);
     try {
@@ -55,6 +74,7 @@ function SignUp() {
         if (orgSlug) {
           localStorage.setItem("orgSlug", orgSlug);
         }
+
         if (redirectUrl) {
           router.push(redirectUrl);
         } else {
@@ -64,7 +84,7 @@ function SignUp() {
           ) {
             router.push(`/${orgSlug}`);
           } else {
-            router.push(`/${orgSlug}/welcome`);
+            router.push(toWelcome(orgSlug));
           }
         }
         const message = `\nName: ${user?.username}\\nEmail: ${user?.email}`;
@@ -98,12 +118,15 @@ function SignUp() {
     if (inviteEmail) {
       setEmail(inviteEmail.trim());
     }
+    const template = searchParams.get("template")?.trim();
+    if (template) {
+      localStorage.setItem("selected_template", template);
+    } else {
+      localStorage.removeItem("selected_template");
+    }
   }, [searchParams]);
 
   useEffect(() => {
-    const minLength = password.length >= 6;
-    setIsMinLength(minLength);
-    setIsValidPassword(minLength);
     setFormSubmitted(false);
   }, [password]);
 
@@ -132,10 +155,8 @@ function SignUp() {
 
     if (!password || password.trim() === "") {
       newErrors.password = "Password is required";
-    } else if (!isValidPassword) {
-      newErrors.password = "Password is not valid";
-    } else if (!isMinLength) {
-      newErrors.password = "Password must have a minimum of 6 characters";
+    } else if (isPasswordTooShort(password)) {
+      newErrors.password = PASSWORD_TOO_SHORT_MESSAGE;
     }
 
     setErrors(newErrors);
@@ -171,7 +192,7 @@ function SignUp() {
       setEmail(trimmedEmail);
     }
 
-    if (validateForm() && isValidPassword) {
+    if (validateForm()) {
       setLoading(true);
       const payload = {
         email: trimmedEmail,
@@ -203,7 +224,7 @@ function SignUp() {
             ) {
               router.push(`/${orgSlug}`);
             } else {
-              router.push(`/${orgSlug}/welcome`);
+              router.push(toWelcome(orgSlug));
             }
           }, 100);
         }
@@ -261,7 +282,7 @@ function SignUp() {
             ) {
               router.push(`/${orgSlug}`);
             } else {
-              router.push(`/${orgSlug}/welcome`);
+              router.push(toWelcome(orgSlug));
             }
           }
 
@@ -358,6 +379,8 @@ function SignUp() {
                     value={password}
                     onChange={handlePasswordChange}
                     placeholder="Password"
+                    aria-describedby="password-help"
+                    aria-invalid={Boolean(errors.password)}
                     onFocus={handleFocus}
                     onBlur={handleBlur}
                     className={`w-full text-[14px] text-[#667085] leading-[15.12px] font-[500] h-[48px] border ${
@@ -384,11 +407,14 @@ function SignUp() {
                   </button>
                 </div>
 
-                {errors.password && (
-                  <small className="text-[12px] text-[#F81404]">
-                    {errors.password}
-                  </small>
-                )}
+                <small
+                  id="password-help"
+                  className={`text-[12px] ${
+                    errors.password ? "text-[#F81404]" : "text-[#667085]"
+                  }`}
+                >
+                  {errors.password || PASSWORD_HINT}
+                </small>
               </div>
             </div>
           </div>

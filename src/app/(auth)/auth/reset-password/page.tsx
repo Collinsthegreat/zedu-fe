@@ -15,6 +15,11 @@ import {
 import { formatTime, maskEmail } from "~/utils";
 import { showSuccess } from "~/components/toast/sonner";
 import { Eye, EyeOff } from "lucide-react";
+import {
+  PASSWORD_HINT,
+  PASSWORD_TOO_SHORT_MESSAGE,
+  isPasswordTooShort,
+} from "~/lib/password";
 
 function ResetPassword() {
   const [password, setPassword] = useState("");
@@ -55,8 +60,8 @@ function ResetPassword() {
 
     if (!password) {
       newErrors.password = "Password is required";
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+    } else if (isPasswordTooShort(password)) {
+      newErrors.password = PASSWORD_TOO_SHORT_MESSAGE;
     }
 
     if (confirmPassword !== password) {
@@ -208,6 +213,9 @@ function ResetPassword() {
                       value={password}
                       onChange={handlePasswordChange}
                       placeholder="Password"
+                      aria-describedby="new-password-help"
+                      aria-invalid={Boolean(errors.password)}
+                      autoComplete="new-password"
                       className={`w-full text-[12px] text-[#667085] leading-[15.12px] font-[500] h-[48px] border ${
                         errors.password
                           ? "border-[#F81404]"
@@ -225,11 +233,14 @@ function ResetPassword() {
                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
                   </div>
-                  {errors.password && (
-                    <small className="text-[12px] text-[#F81404]">
-                      {errors.password}
-                    </small>
-                  )}
+                  <small
+                    id="new-password-help"
+                    className={`text-[12px] ${
+                      errors.password ? "text-[#F81404]" : "text-[#667085]"
+                    }`}
+                  >
+                    {errors.password || PASSWORD_HINT}
+                  </small>
                 </div>
               </div>
 
@@ -248,6 +259,7 @@ function ResetPassword() {
                       value={confirmPassword}
                       onChange={handleConfirmPasswordChange}
                       placeholder="Confirm New Password"
+                      autoComplete="new-password"
                       className={`w-full text-[12px] text-[#667085] leading-[15.12px] font-[500] h-[48px] border ${
                         errors.confirmPassword
                           ? "border-[#F81404]"
