@@ -29,6 +29,8 @@ describe("Contact Sales phone validation", () => {
     });
 
     cy.get("#phone").clear().type("+234 801 234 5678");
+    cy.get("#organization_type").click();
+    cy.contains("[role=option]", "Bootcamp").click();
     cy.contains("button", "Send").click();
 
     cy.wait("@contactSales")
