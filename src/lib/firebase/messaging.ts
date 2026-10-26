@@ -120,6 +120,25 @@ export const setupWebPush = async (): Promise<WebPushSetup> => {
   return { token, messaging, error: null };
 };
 
+const showPushNotification = (
+  title: string,
+  body: string,
+  data?: { [key: string]: string }
+) => {
+  const options = { body, data: data ?? {} };
+
+  if (!("serviceWorker" in navigator)) {
+    new Notification(title, { body });
+    return;
+  }
+
+  navigator.serviceWorker.ready
+    .then((registration) => registration.showNotification(title, options))
+    .catch(() => {
+      new Notification(title, { body });
+    });
+};
+
 export const listenForForegroundMessages = (messaging: Messaging) =>
   onMessage(messaging, (payload) => {
     const title = payload.notification?.title || payload.data?.title || "Zedu";
@@ -127,5 +146,5 @@ export const listenForForegroundMessages = (messaging: Messaging) =>
 
     if (Notification.permission !== "granted") return;
 
-    new Notification(title, { body });
+    showPushNotification(title, body, payload.data);
   });

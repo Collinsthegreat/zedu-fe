@@ -18,6 +18,14 @@ export function GET() {
 importScripts("https://www.gstatic.com/firebasejs/${firebaseVersion}/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/${firebaseVersion}/firebase-messaging-compat.js");
 
+self.addEventListener("install", () => {
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
 firebase.initializeApp(${JSON.stringify(config)});
 
 const messaging = firebase.messaging();
@@ -26,7 +34,7 @@ messaging.onBackgroundMessage((payload) => {
   const title = payload.notification?.title || payload.data?.title || "Zedu";
   const body = payload.notification?.body || payload.data?.body || "";
 
-  self.registration.showNotification(title, {
+  return self.registration.showNotification(title, {
     body,
     data: payload.data || {},
   });
