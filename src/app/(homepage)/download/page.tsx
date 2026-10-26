@@ -116,7 +116,7 @@ const DownLoadPage = () => {
               src={"/images/homepage/download/users-image.png"}
               width={150}
               height={10}
-              alt="People already using zedu"
+              alt="People already using Zedu"
             />
           </div>
           <p className="text-neutral-100 text-center">
