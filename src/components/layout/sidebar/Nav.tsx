@@ -20,6 +20,7 @@ import ChannelInviteModal from "~/app/(client)/[org]/_components/invite-modal/ch
 import OrganisationMenu from "~/app/(client)/[org]/_components/org-dropdown";
 import Tooltips from "~/app/(client)/[org]/_components/tooltip";
 import { formatCount } from "~/utils/utils";
+import { parseStoredAccordions } from "~/utils/stored-accordions";
 // import AddColleagueDialog from "~/app/(client)/[org]/_components/colleagues/add-colleagues-modal";
 // import { ColleaguesCard } from "~/app/(client)/[org]/_components/colleagues/card";
 
@@ -64,13 +65,12 @@ export default function ChannelNav({
   };
 
   const [openAccordions, setOpenAccordions] = useState<string[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("openAccordions");
-      return saved
-        ? JSON.parse(saved)
-        : ["starred", "channels", "workflows", "agents", "people"];
-    }
-    return ["starred", "channels", "workflows", "agents", "people"];
+    const defaults = ["starred", "channels", "workflows", "agents", "people"];
+    if (typeof window === "undefined") return defaults;
+    return parseStoredAccordions(
+      localStorage.getItem("openAccordions"),
+      defaults
+    );
   });
 
   const handleAccordionChanges = (values: string[]) => {

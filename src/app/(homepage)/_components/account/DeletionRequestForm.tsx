@@ -6,7 +6,6 @@ import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { Mail, Send, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { PostRequest } from "~/utils/new-request";
-import { useRouter } from "next/navigation";
 
 const DeletionRequestForm = () => {
   const [loading, setLoading] = useState(false);
@@ -18,8 +17,6 @@ const DeletionRequestForm = () => {
     reason: "",
     additional_info: "",
   });
-
-  const router = useRouter();
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -51,8 +48,9 @@ const DeletionRequestForm = () => {
 
     const res = await PostRequest("/account/delete-account", formData);
     if (res.status === 200 || res.status === 201) {
+      // Stay on the page so the success card (and its "check your email"
+      // instructions) is shown, instead of redirecting home straight away.
       setSubmitted(true);
-      router.push("/");
       setFormData({
         fullname: "",
         email: "",
