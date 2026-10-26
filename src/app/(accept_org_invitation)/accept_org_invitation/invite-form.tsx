@@ -171,7 +171,7 @@ const InviteForm = () => {
             </h1>
 
             <p className="mt-2 text-base text-gray-700">
-              Zedu is where work happens for companies of all sizes.
+              Zedu brings learners and educators together in one workspace.
             </p>
 
             <div className="mt-6 flex items-center justify-center">

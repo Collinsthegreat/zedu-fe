@@ -28,7 +28,7 @@ const Success: React.FC = () => {
         <main className="flex flex-col gap-6 mx-auto md:mx-auto items-center">
           <div className="flex flex-col gap-[32px] items-center">
             <h3 className="font-semibold text-2xl text-[#1D2939] text-center">
-              Awesome! mail sent.
+              Awesome! Email sent.
             </h3>
             <Image src={success} alt="success" width={120} height={120} />
             <Suspense fallback={<p>Loading email...</p>}>
