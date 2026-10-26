@@ -535,7 +535,7 @@ function SignUp() {
           </div>
 
           <p className="text-[14px] font-[400] leading-[17.64px] text-center m-2">
-            By Signing up, you agree to our
+            By signing up, you agree to our
             <Link
               href="/terms-of-service"
               target="_blank"
