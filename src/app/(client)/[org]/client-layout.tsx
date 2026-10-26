@@ -18,8 +18,7 @@ import UserSidebar from "./_components/profile-sidebar/user-sidebar";
 import { TooltipProvider } from "~/components/ui/tooltip";
 import { UploadProvider } from "~/store/UploadContext";
 import UploadProgressPopover from "./_components/file-management/UploadProgressPopover";
-import OneSignalProvider from "~/components/layout/onesignal/onesignal-provider";
-import OneSignalSubscriptionSync from "~/components/layout/onesignal/onesignal-subscription";
+import FirebasePush from "~/components/layout/firebase/firebase-push";
 import { NotificationBanner } from "./_components/notification-banner";
 import IncomingCallPopupContainer from "~/app/(client)/[org]/_components/buzz-management/IncomingCallPopupContainer";
 import StatusConnection from "~/components/layout/centrifugo/status-connection";
@@ -292,8 +291,7 @@ const ClientLayout = ({
     return (
       <UploadProvider>
         <TooltipProvider>
-          <OneSignalProvider />
-          <OneSignalSubscriptionSync />
+          <FirebasePush />
           <ChannelBuzzProvider options={channelBuzzOptions}>
             {children}
           </ChannelBuzzProvider>
@@ -313,8 +311,7 @@ const ClientLayout = ({
         </>
       )}
       <TooltipProvider>
-        <OneSignalProvider />
-        <OneSignalSubscriptionSync />
+        <FirebasePush />
         {!isRecorderSession && <StatusConnection />}
 
         <ChannelBuzzProvider options={channelBuzzOptions}>
