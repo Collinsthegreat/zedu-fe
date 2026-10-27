@@ -118,6 +118,12 @@ jobs:
         if: steps.prepare.outputs.noop != 'true' && steps.prepare.outputs.unchanged != 'true'
         run: pnpm install --frozen-lockfile
 
+      # next-env.d.ts is gitignored, so a fresh checkout has no image types and
+      # tsc reads every asset import as string. Generate them before the checks.
+      - name: Generate Next.js types
+        if: steps.prepare.outputs.noop != 'true' && steps.prepare.outputs.unchanged != 'true'
+        run: pnpm exec next typegen
+
       - name: Prettier, ESLint, TypeScript, and build
         if: steps.prepare.outputs.noop != 'true' && steps.prepare.outputs.unchanged != 'true'
         run: |
