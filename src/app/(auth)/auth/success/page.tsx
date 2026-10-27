@@ -45,7 +45,7 @@ const SuccessContent: React.FC = () => {
   const email = searchParams.get("email");
 
   return (
-    <p className="font-normal text-[lg] text-[#344054] text-center">
+    <p className="font-normal text-lg text-[#344054] text-center">
       We&apos;ve just sent an email to <strong>{email}</strong> with detailed
       instructions on how to access your account.
     </p>
