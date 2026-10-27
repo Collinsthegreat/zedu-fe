@@ -194,10 +194,11 @@ function enableSigning() {
 function assertVerified(sha) {
   if (!SIGNING_KEY) return;
 
+  // The candidate is pushed to the upstream repo, so ask about it there.
   const result = run(
     "gh",
-    ["api", `repos/${FORK}/commits/${sha}`, "--jq", ".commit.verification"],
-    { allowFail: true, env: { GH_TOKEN: FORK_TOKEN } }
+    ["api", `repos/${UPSTREAM}/commits/${sha}`, "--jq", ".commit.verification"],
+    { allowFail: true }
   );
 
   if (result.status !== 0) {
