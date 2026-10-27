@@ -42,7 +42,8 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({ user }) => {
   };
 
   // logout user
-  const handleLogout = async () => {
+  const handleLogout = () => {
+    sessionStorage.removeItem("fcm_token");
     localStorage.clear();
     window.location.href = "/auth/login";
   };
