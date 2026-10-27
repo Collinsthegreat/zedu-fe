@@ -120,6 +120,9 @@ const appStoreLinks = [
 
 const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ["latin"] });
 
+// Isolated Axios client for public newsletter subscription.
+// Kept separate from the global HTTP client to avoid global interceptor side effects
+// (such as authentication-expiry redirects or token attachment) and global toast dismissals.
 const newsletterClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BASE_URL,
 });
