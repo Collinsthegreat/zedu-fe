@@ -74,8 +74,8 @@ function ForgotPassword() {
               Forgot Password
             </h1>
             <p className="w-full text-center text-[14px] md:text-[16px] text-[#344054] font-[400] leading-[21px] md:leading-[27px]">
-              Enter the email you used in creating your account, we will send
-              you instructions on how to reset your password.
+              Enter the email you used to create your account, and we will send
+              you instructions to reset your password.
             </p>
           </div>
           <form onSubmit={handleSubmit} className="w-full">
