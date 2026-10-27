@@ -5,6 +5,7 @@ import SettingsLabel from "../../components/settings-label";
 import { GetRequest, PostRequest } from "~/utils/new-request";
 import Loading from "~/components/ui/loading";
 import { NotificationPermissionHelp } from "~/app/(client)/[org]/_components/notification-permission-guidance";
+import { buildTimeRange } from "./time-range";
 
 type Preferences = {
   notificationType: "all" | "mentions" | "nothing";
@@ -26,6 +27,7 @@ const NotificationPage = () => {
     useState<Preferences>(defaultPreferences);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [timeError, setTimeError] = useState<string | null>(null);
 
   const hasChanges = JSON.stringify(prefs) !== JSON.stringify(initialPrefs);
 
@@ -68,14 +70,6 @@ const NotificationPage = () => {
     return "nothing";
   };
 
-  const convertTo12Hour = (time: string) => {
-    const [h, m] = time.split(":");
-    const hour = parseInt(h, 10);
-    const suffix = hour >= 12 ? "PM" : "AM";
-    const formattedHour = hour % 12 === 0 ? 12 : hour % 12;
-    return `${formattedHour.toString().padStart(2, "0")}:${m} ${suffix}`;
-  };
-
   const convertTo24Hour = (time: string) => {
     const [t, suffix] = time.split(" ");
     let [h, m] = t.split(":").map(Number);
@@ -87,6 +81,13 @@ const NotificationPage = () => {
   const handleSave = async () => {
     const orgId = localStorage.getItem("orgId") || "";
 
+    const timeRange = buildTimeRange(prefs.timeFrom, prefs.timeTo);
+    if (timeRange === null) {
+      setTimeError("Please set both the From and To times before saving.");
+      return;
+    }
+    setTimeError(null);
+
     setSaving(true);
 
     const payload = {
@@ -97,7 +98,7 @@ const NotificationPage = () => {
             ? "mentions"
             : "nothing",
       send_mail: prefs.infoMethod === "email",
-      time_range: `${convertTo12Hour(prefs.timeFrom)} - ${convertTo12Hour(prefs.timeTo)}`,
+      time_range: timeRange,
       device_type: "web",
     };
 
@@ -113,6 +114,7 @@ const NotificationPage = () => {
 
   const handleRevert = () => {
     setPrefs(initialPrefs);
+    setTimeError(null);
   };
 
   if (loading) {
@@ -178,9 +180,10 @@ const NotificationPage = () => {
               <input
                 type="time"
                 value={prefs.timeFrom}
-                onChange={(e) =>
-                  setPrefs((prev) => ({ ...prev, timeFrom: e.target.value }))
-                }
+                onChange={(e) => {
+                  setTimeError(null);
+                  setPrefs((prev) => ({ ...prev, timeFrom: e.target.value }));
+                }}
                 className="border rounded p-3"
               />
             </div>
@@ -189,9 +192,10 @@ const NotificationPage = () => {
               <input
                 type="time"
                 value={prefs.timeTo}
-                onChange={(e) =>
-                  setPrefs((prev) => ({ ...prev, timeTo: e.target.value }))
-                }
+                onChange={(e) => {
+                  setTimeError(null);
+                  setPrefs((prev) => ({ ...prev, timeTo: e.target.value }));
+                }}
                 className="border rounded p-3"
               />
             </div>
@@ -200,6 +204,11 @@ const NotificationPage = () => {
             <span className="font-medium text-black">Note:</span> Outside this
             time, notifications are paused.
           </p>
+          {timeError && (
+            <p role="alert" className="text-xs text-red-600 mt-1">
+              {timeError}
+            </p>
+          )}
         </div>
 
         <hr className="bg-[#E6EAEF] border my-4" />

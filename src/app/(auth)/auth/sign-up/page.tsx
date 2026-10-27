@@ -19,11 +19,12 @@ import {
   isPasswordTooShort,
 } from "~/lib/password";
 
-/** User registration page supporting email/password, Google, Apple auth, and template onboarding. */
-// The backend auto-creates a workspace at signup, so `is_onboarded` being
-// true does not mean the user ever chose one. A missing type is never default.
-const isAutoCreatedOrg = (type?: string) =>
-  (type ?? "").trim().toLowerCase() === "user default org";
+import { isAutoCreatedOrg } from "~/utils/organisation";
+
+/**
+ * User registration page supporting email/password, Google, Apple auth, and template onboarding.
+ * @returns Rendered sign-up component.
+ */
 function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,14 +41,22 @@ function SignUp() {
   const [loading, setLoading] = useState(false);
   const [googleloading, setGoogleloading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
-  const tmpl =
-    searchParams.get("template") ||
-    (typeof window !== "undefined"
-      ? localStorage.getItem("selected_template")
-      : null);
-  const toWelcome = (slug: string) =>
-    `/${slug}/welcome${tmpl ? `?template=${tmpl}` : ""}`;
-  // Apple Login handler
+  /**
+   * Constructs destination route to the welcome flow preserving any template param.
+   * @param slug Organization slug identifier.
+   * @returns Route path string.
+   */
+  const toWelcome = (slug: string) => {
+    const tmpl = searchParams.get("template")?.trim();
+    return tmpl
+      ? `/${slug}/welcome?template=${encodeURIComponent(tmpl)}`
+      : `/${slug}/welcome`;
+  };
+
+  /**
+   * Handles successful Apple authentication credential callback.
+   * @param response Apple authentication response payload.
+   */
   const handleAppleSuccess = async (response: any) => {
     setAppleLoading(true);
     try {
@@ -109,9 +118,11 @@ function SignUp() {
     if (inviteEmail) {
       setEmail(inviteEmail.trim());
     }
-    const template = searchParams.get("template");
+    const template = searchParams.get("template")?.trim();
     if (template) {
       localStorage.setItem("selected_template", template);
+    } else {
+      localStorage.removeItem("selected_template");
     }
   }, [searchParams]);
 
@@ -304,7 +315,7 @@ function SignUp() {
     <main className="w-full min-h-screen flex flex-col items-center">
       <div className="flex items-center justify-between w-full py-6 max-w-7xl px-4 sm:px-6 lg:px-8">
         <Link href="/">
-          <Image src="/Zedu.png" alt="" width={86} height={31} />
+          <Image src="/Zedu.png" alt="Zedu home" width={86} height={31} />
         </Link>
         <div>
           Already have an account?{" "}
@@ -336,6 +347,7 @@ function SignUp() {
                 <input
                   id="email"
                   type="email"
+                  autoComplete="email"
                   value={email}
                   onChange={handleEmailChange}
                   onBlur={handleEmailBlur}
@@ -363,12 +375,12 @@ function SignUp() {
                   <input
                     id="password"
                     type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
                     value={password}
                     onChange={handlePasswordChange}
                     placeholder="Password"
                     aria-describedby="password-help"
                     aria-invalid={Boolean(errors.password)}
-                    autoComplete="new-password"
                     onFocus={handleFocus}
                     onBlur={handleBlur}
                     className={`w-full text-[14px] text-[#667085] leading-[15.12px] font-[500] h-[48px] border ${
@@ -408,10 +420,13 @@ function SignUp() {
           </div>
           <div className="flex flex-col gap-[12px] mb-3">
             <div className="flex flex-row gap-[6px] items-center">
-              <Checkbox className="mt-[2px]" />
-              <p className="text-[14px] font-[400] leading-[17.64px]">
+              <Checkbox id="stay-signed-in" className="mt-[2px]" />
+              <label
+                htmlFor="stay-signed-in"
+                className="text-[14px] font-[400] leading-[17.64px]"
+              >
                 Stay Signed In
-              </p>
+              </label>
             </div>
           </div>
           <div className="flex flex-col gap-[24px]">
@@ -520,10 +535,11 @@ function SignUp() {
           </div>
 
           <p className="text-[14px] font-[400] leading-[17.64px] text-center m-2">
-            By Signing up, you agree to our
+            By signing up, you agree to our
             <Link
               href="/terms-of-service"
               target="_blank"
+              rel="noopener noreferrer"
               className="px-1 font-[500] leading-[21px] text-[#7141F8] hover:text-[#9678e8]"
             >
               terms of service
@@ -532,6 +548,7 @@ function SignUp() {
             <Link
               href="/policy"
               target="_blank"
+              rel="noopener noreferrer"
               className="px-1 font-[500] leading-[21px] text-[#7141F8] hover:text-[#9678e8]"
             >
               privacy policy

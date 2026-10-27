@@ -4,33 +4,61 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Hash, Layers } from "lucide-react";
 import { getTemplateBySlug, TEMPLATES } from "~/data/templates";
 import type { Metadata } from "next";
+import { ogImageUrl } from "~/lib/env-urls";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
-/** Generates dynamic metadata for a template detail page. */
+/**
+ * Generates dynamic metadata for a template detail page.
+ * @param props Route properties containing page params promise.
+ * @returns Metadata object for the template route.
+ */
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const t = getTemplateBySlug(slug);
-  if (!t) return { title: "Template Not Found | Zedu" };
-  const title = `${t.title} Workspace Template | Zedu`;
+  const template = getTemplateBySlug(slug);
+  if (!template) return { title: "Template Not Found" };
+  const title = `${template.title} Workspace Template`;
   return {
     title,
-    description: `${t.description} Includes #${t.channels.slice(0, 3).join(", #")}.`,
-    openGraph: { title, url: `/templates/${slug}`, siteName: "Zedu" },
+    description: `${template.description} Includes #${template.channels.slice(0, 3).join(", #")}.`,
+    openGraph: {
+      title,
+      description: template.description,
+      url: `/templates/${template.slug}`,
+      siteName: "Zedu",
+      images: [
+        {
+          url: ogImageUrl("og-image-5.png"),
+          width: 1200,
+          height: 630,
+          alt: "Zedu learning platform for educators and cohorts",
+        },
+      ],
+    },
   };
 }
 
-/** Pre-renders static route parameters for template presets. */
+/**
+ * Pre-renders static route parameters for template presets.
+ * @returns Array of route parameter objects for static generation.
+ */
 export const generateStaticParams = () =>
   TEMPLATES.map((t) => ({ slug: t.slug }));
 
-/** Detail view displaying channel architecture and AI assistant configurations. */
+/**
+ * Detail view displaying channel architecture and AI assistant configurations.
+ * @param props Route properties containing page params promise.
+ * @returns Rendered template detail page or notFound.
+ */
 export default async function TemplateDetailPage({ params }: PageProps) {
   const { slug } = await params;
   const t = getTemplateBySlug(slug);
-  if (!t) notFound();
+  if (!t) {
+    notFound();
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-[#070B14] text-slate-100 px-4 py-12 sm:px-6 lg:px-8">

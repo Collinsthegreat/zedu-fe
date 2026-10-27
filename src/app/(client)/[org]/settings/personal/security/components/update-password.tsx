@@ -105,6 +105,9 @@ const UpdatePassword = () => {
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={
+                    showPassword ? "Hide old password" : "Show old password"
+                  }
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -115,7 +118,7 @@ const UpdatePassword = () => {
             <div className="mb-4">
               <label
                 className="block text-sm font-medium mb-1"
-                htmlFor="password"
+                htmlFor="new-password"
               >
                 New Password
               </label>
@@ -137,6 +140,9 @@ const UpdatePassword = () => {
                 <button
                   type="button"
                   onClick={() => setShowNewPassword((prev) => !prev)}
+                  aria-label={
+                    showNewPassword ? "Hide new password" : "Show new password"
+                  }
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
                 >
                   {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -155,7 +161,7 @@ const UpdatePassword = () => {
             <div className="mb-4">
               <label
                 className="block text-sm font-medium mb-1"
-                htmlFor="password"
+                htmlFor="confirm-password"
               >
                 Confirm Password
               </label>
@@ -172,6 +178,11 @@ const UpdatePassword = () => {
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  aria-label={
+                    showConfirmPassword
+                      ? "Hide password confirmation"
+                      : "Show password confirmation"
+                  }
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500"
                 >
                   {showConfirmPassword ? (

@@ -1,4 +1,4 @@
-import { PostRequest } from "~/utils/request";
+import axios from "axios";
 
 export interface TemplatePreset {
   slug: string;
@@ -41,33 +41,64 @@ export const TEMPLATES: TemplatePreset[] = PRESET_DATA.map((r) => {
   };
 });
 
-/** Retrieves a template preset by slug or normalized string. */
-export const getTemplateBySlug = (slug: string) =>
-  TEMPLATES.find(
-    (t) =>
-      t.slug === slug ||
-      t.slug.replace(/-/g, "") === slug?.toLowerCase().replace(/[^a-z0-9]/g, "")
-  );
+/**
+ * Retrieves a template preset by exact canonical slug.
+ * @param slug The template slug identifier.
+ * @returns The matching template preset or undefined.
+ */
+export function getTemplateBySlug(slug: string): TemplatePreset | undefined {
+  if (!slug) return undefined;
+  return TEMPLATES.find((t) => t.slug === slug);
+}
 
-/** Reads a key safely from localStorage in browser environments. */
+/**
+ * Reads a key safely from localStorage in browser environments.
+ * @param k The localStorage key to query.
+ * @returns The stored string value or null.
+ */
 const getStored = (k: string) =>
   typeof window !== "undefined" ? localStorage.getItem(k) : null;
 
-/** Provisions template channels for an organization via parallel API requests. */
+/**
+ * Provisions template channels for an organization via parallel API requests.
+ * Direct axios requests are used to prevent per-channel error toast popups on non-2xx codes.
+ * @param orgId The destination organization identifier.
+ * @param slug Optional template slug to override stored selection.
+ * @param token Optional auth token for request authentication.
+ * @returns True if all channels were created or already existed; false otherwise.
+ */
 export async function provisionTemplateChannels(
   orgId: string,
   slug?: string | null,
   token?: string
 ): Promise<boolean> {
+  const rawSlug = slug || getStored("selected_template");
+  if (!rawSlug) {
+    return true;
+  }
+
+  const normalizedSlug = rawSlug.trim().toLowerCase();
   const t =
-    orgId && getTemplateBySlug(slug || getStored("selected_template") || "");
+    orgId &&
+    (getTemplateBySlug(rawSlug) ||
+      getTemplateBySlug(normalizedSlug) ||
+      TEMPLATES.find((p) => p.slug === normalizedSlug));
+
   if (!t) {
-    if (typeof window !== "undefined" && getStored("selected_template")) {
+    if (typeof window !== "undefined") {
       localStorage.removeItem("selected_template");
     }
+    return true;
+  }
+
+  const auth = token || getStored("token") || "";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_BASE_URL;
+
+  if (!auth || !baseUrl) {
     return false;
   }
-  const auth = token || getStored("token") || "";
+
   let u: any = {};
   try {
     u = JSON.parse(getStored("user") || "{}");
@@ -75,33 +106,63 @@ export async function provisionTemplateChannels(
     u = {};
   }
   const Username = u?.username || u?.email;
+
+  /**
+   * Formats the channel payload for the channel creation endpoint.
+   * @param n Raw channel name.
+   * @returns Channel creation request object.
+   */
   const payload = (n: string) => ({
     name: n.replace(/^#/, ""),
     organisation_id: orgId,
     is_private: false,
     Username,
   });
+
   try {
     const results = await Promise.all(
-      t.channels.map((n) => PostRequest("/channels", payload(n), auth))
+      t.channels.map(async (n) => {
+        try {
+          const res = await axios.post(`${baseUrl}/channels`, payload(n), {
+            headers: {
+              Authorization: `Bearer ${auth}`,
+              "Content-Type": "application/json",
+            },
+            validateStatus: () => true,
+          });
+          return res;
+        } catch (error) {
+          return { status: 500, error };
+        }
+      })
     );
+
+    /**
+     * Verifies whether an API response indicates success or conflict (already provisioned).
+     * @param res API response candidate.
+     * @returns True if response status code indicates success or conflict.
+     */
     const isSuccessOrConflict = (res: any) =>
-      res &&
-      (res.status === 200 ||
-        res.status === 201 ||
-        res.status === 409 ||
-        res?.data?.status_code === 200 ||
-        res?.data?.status_code === 201 ||
-        res?.data?.status_code === 409);
+      Boolean(
+        res &&
+        (res.status === 200 ||
+          res.status === 201 ||
+          res.status === 409 ||
+          res?.data?.status_code === 200 ||
+          res?.data?.status_code === 201 ||
+          res?.data?.status_code === 409)
+      );
 
-    const hasSuccess =
+    const allSucceeded =
       results.length > 0 &&
-      results.some((res: any) => isSuccessOrConflict(res));
+      results.every((res: any) => isSuccessOrConflict(res));
 
-    return hasSuccess;
-  } finally {
-    if (typeof window !== "undefined") {
+    if (allSucceeded && typeof window !== "undefined") {
       localStorage.removeItem("selected_template");
     }
+
+    return allSucceeded;
+  } catch {
+    return false;
   }
 }

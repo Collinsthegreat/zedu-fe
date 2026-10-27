@@ -594,6 +594,39 @@ const useMediaActions = (mediaItem: MediaItem, item: any) => {
   };
 };
 
+// Shows the media actions on pointer hover or while keyboard focus is inside the
+// block. The two are tracked separately, so moving the pointer away cannot hide
+// an action that has keyboard focus. Focus moving into the "more" menu
+// (rendered in a portal) keeps them shown.
+const useRevealActions = () => {
+  const [hovered, setHovered] = useState(false);
+  const [focused, setFocused] = useState(false);
+  return {
+    isHovered: hovered || focused,
+    revealProps: {
+      onMouseEnter: () => setHovered(true),
+      onMouseLeave: () => setHovered(false),
+      onFocus: () => setFocused(true),
+      onBlur: (e: React.FocusEvent<HTMLElement>) => {
+        const next = e.relatedTarget as HTMLElement | null;
+        if (
+          next &&
+          (e.currentTarget.contains(next) ||
+            next.closest("[data-radix-popper-content-wrapper]"))
+        ) {
+          return;
+        }
+        setFocused(false);
+      },
+    },
+  };
+};
+
+// A media block with nothing focusable inside (an image, or a video that
+// failed to load) is focusable itself, so keyboard users can reach its actions.
+const FOCUSABLE_MEDIA =
+  "rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2";
+
 const MediaActionMenu: React.FC<{
   onDownload: (e: React.MouseEvent) => void;
   onCopyLink: () => void;
@@ -601,15 +634,24 @@ const MediaActionMenu: React.FC<{
   onDelete: () => void;
 }> = ({ onDownload, onCopyLink, onShare, onDelete }) => (
   <>
-    <div className="hover:bg-gray-200 rounded-md p-1" onClick={onDownload}>
+    <Button
+      type="button"
+      size="icon"
+      variant="ghost"
+      aria-label="Download"
+      title="Download"
+      className="h-7 w-7 hover:bg-gray-200"
+      onClick={onDownload}
+    >
       <DownloadIcon size={18} />
-    </div>
+    </Button>
 
     <Popover>
       <PopoverTrigger asChild>
         <Button
           size="icon"
           variant="ghost"
+          aria-label="Media actions"
           className="h-7 w-7 text-muted-foreground hover:text-foreground"
         >
           <MoreVertical className="h-4 w-4" />
@@ -660,7 +702,7 @@ const ImageWithDownload: React.FC<{
   setImage: any;
   item: any;
 }> = ({ mediaItem, setIsOpen, setImage, item }) => {
-  const [isHovered, setIsHovered] = useState(false);
+  const { isHovered, revealProps } = useRevealActions();
   const [imageError, setImageError] = useState(false);
   const {
     deleteMessage,
@@ -678,9 +720,11 @@ const ImageWithDownload: React.FC<{
 
   return (
     <div
-      className="relative min-w-0 w-fit max-w-full"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className={`relative min-w-0 w-fit max-w-full ${FOCUSABLE_MEDIA}`}
+      tabIndex={0}
+      role="group"
+      aria-label={`${mediaItem.file_name}: use Tab for media actions`}
+      {...revealProps}
     >
       <img
         src={mediaItem.file_link}
@@ -693,10 +737,9 @@ const ImageWithDownload: React.FC<{
         onError={() => setImageError(true)}
       />
       {isHovered && (
-        <a
-          href="#"
+        <div
           className="flex items-center gap-1 absolute top-2 right-2 bg-white py-1 px-2 rounded-lg z-10"
-          title="Download Image"
+          title="Media actions"
         >
           <MediaActionMenu
             onDownload={handleDownload}
@@ -704,7 +747,7 @@ const ImageWithDownload: React.FC<{
             onShare={() => setShareOpen(true)}
             onDelete={handleDelete}
           />
-        </a>
+        </div>
       )}
 
       <ShareFileModal
@@ -728,7 +771,7 @@ const FileWithDownload: React.FC<{
   mediaItem: MediaItem;
   item: any;
 }> = ({ mediaItem, item }) => {
-  const [isHovered, setIsHovered] = useState(false);
+  const { isHovered, revealProps } = useRevealActions();
   const {
     deleteMessage,
     setDeleteMessage,
@@ -745,8 +788,7 @@ const FileWithDownload: React.FC<{
   return (
     <div
       className="relative border rounded-lg shadow-sm bg-white min-h-[200px] w-[200px] overflow-hidden"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      {...revealProps}
     >
       <a
         href={mediaItem.file_link}
@@ -823,7 +865,7 @@ const VideoWithDownload: React.FC<{
   mediaItem: MediaItem;
   item: any;
 }> = ({ mediaItem, item }) => {
-  const [isHovered, setIsHovered] = useState(false);
+  const { isHovered, revealProps } = useRevealActions();
   const [nativeFullscreen, setNativeFullscreen] = useState(false);
   const [frame, setFrame] = useState<{ width: number; height: number } | null>(
     null
@@ -879,9 +921,14 @@ const VideoWithDownload: React.FC<{
 
   return (
     <div
-      className="relative min-w-0 w-fit max-w-full"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className={`relative min-w-0 w-fit max-w-full ${failed ? FOCUSABLE_MEDIA : ""}`}
+      // A failed video has no play button, so the block itself takes focus.
+      tabIndex={failed ? 0 : undefined}
+      role={failed ? "group" : undefined}
+      aria-label={
+        failed ? `${mediaItem.file_name}: use Tab for media actions` : undefined
+      }
+      {...revealProps}
     >
       <div
         className={

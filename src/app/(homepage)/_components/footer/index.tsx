@@ -1,12 +1,11 @@
 "use client";
-
+import { isValidEmail } from "~/lib/utils";
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Plus_Jakarta_Sans } from "next/font/google";
-import { PostRequest } from "~/utils/new-request";
-import { showSuccess } from "~/components/toast/sonner";
-import { toast } from "sonner";
+import { PostRequest } from "~/utils/request";
+import { useToast } from "~/components/ui/use-toast";
 import {
   appStoreUrl,
   facebookUrl,
@@ -43,8 +42,9 @@ const supportLinks: FooterLink[] = [
 
 const resourcesLinks: FooterLink[] = [
   { id: 0, label: "Resource Library", href: "/resources" },
-  { id: 1, label: "Privacy Policy", href: "/policy" },
-  { id: 2, label: "Terms of Service", href: "/terms-of-service" },
+  { id: 1, label: "Templates", href: "/templates" },
+  { id: 2, label: "Privacy Policy", href: "/policy" },
+  { id: 3, label: "Terms of Service", href: "/terms-of-service" },
 ];
 
 const footerSections = [
@@ -106,81 +106,34 @@ const Footer = () => {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState<boolean>(false);
+  const { toast } = useToast();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    setLoading(true);
+    const token = localStorage.getItem("token") || "";
 
-    if (loading) return;
-
-    setError("");
-
-    if (!validateEmail(email)) {
+    if (!isValidEmail(email)) {
       setError("Please enter a valid email address.");
+      setLoading(false);
       return;
     }
 
-    setLoading(true);
-
-    try {
-      const req = await PostRequest("/newsletter", { email });
-
-      const status = req?.response?.status ?? req?.status;
-      const body = req?.response?.data ?? req?.data;
-
-      const isSuccess =
-        (status === 200 || status === 201) &&
-        status !== 409 &&
-        body?.status_code !== 409;
-
-      const isAlreadySubscribed = status === 409 || body?.status_code === 409;
-
-      if (isSuccess) {
-        setEmail("");
-        setError("");
-        showSuccess(
-          "You're subscribed!",
-          "Thanks for joining us. Stay tuned for the latest updates from Zedu."
-        );
-      } else {
-        // Suppress the duplicate toast triggered inside PostRequest
-        toast.dismiss();
-
-        if (isAlreadySubscribed) {
-          setError(
-            "This email is already subscribed. Please try another email address."
-          );
-        } else {
-          setError(
-            body?.message ||
-              "We couldn't subscribe you right now. Please try again."
-          );
-        }
-      }
-    } catch (error: any) {
-      toast.dismiss();
-      const status = error?.response?.status ?? error?.status;
-      const body = error?.response?.data ?? error?.data;
-      const isAlreadySubscribed = status === 409 || body?.status_code === 409;
-
-      if (isAlreadySubscribed) {
-        setError(
-          "This email is already subscribed. Please try another email address."
-        );
-      } else {
-        setError(
-          body?.message ||
-            error?.message ||
-            "Something went wrong. Please try again."
-        );
-      }
-    } finally {
-      setLoading(false);
+    const req = await PostRequest("/newsletter", { email: email }, token);
+    setLoading(false);
+    if (req?.data?.status_code === 201) {
+      setEmail("");
+      setError("");
+      toast({
+        description: "Email sent successfully!",
+      });
+    } else {
+      setError(req?.data?.message);
+      return;
     }
   };
-  const validateEmail = (email: string) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(String(email).toLowerCase());
-  };
+
+  //
 
   return (
     <footer className="flex flex-col bg-[#303073] text-[#fafafa] px-6">
@@ -188,7 +141,11 @@ const Footer = () => {
         <div className="flex flex-col gap-12 xl:flex-row xl:items-start xl:justify-between xl:gap-16">
           <div className="w-full max-w-[420px] space-y-8">
             <div className="flex items-center gap-3">
-              <Link href="/" className="[&>svg]:h-[39px] [&>svg]:w-[39px]">
+              <Link
+                href="/"
+                aria-label="Zedu home"
+                className="[&>svg]:h-[39px] [&>svg]:w-[39px]"
+              >
                 <ZeduRoundedWhiteLogo />
               </Link>
               <h3 className="text-2xl font-semibold leading-none text-white">
@@ -282,7 +239,7 @@ const Footer = () => {
 
             <div className="space-y-4">
               <p className="text-white/90">
-                Mobile App is available on Google Play and the App Store
+                Mobile App is available on Google PlayStore and AppStore
               </p>
               <div className="mt-5 flex flex-wrap items-start gap-8 text-white">
                 {appStoreLinks.map((store) => (

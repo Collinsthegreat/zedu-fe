@@ -359,16 +359,16 @@ function Policy() {
               <Link
                 href={siteUrl()}
                 target="_blank"
-                rel=""
+                rel="noopener noreferrer"
                 className="text-blue-500"
               >
                 www.zedu.chat
               </Link>
             </span>
             including any other media form, media channel, mobile website, or
-            mobile application related or connected thereto Zedu. Please read
-            this privacy policy carefully. If you do not agree with the terms of
-            this privacy policy, please do not access the site.
+            mobile application related or connected to it. Please read this
+            privacy policy carefully. If you do not agree with the terms of this
+            privacy policy, please do not access the site.
           </p>
           <br />
           <br />
@@ -404,10 +404,11 @@ function Policy() {
               How We Use Your Information
             </li>
 
-            <p>We may use the information we collect in the following way:</p>
+            <p>We may use the information we collect in the following ways:</p>
             <ul className="list-disc">
               <li>To personalize user experience</li>
-              <li>To improve our site To send periodic emails</li>
+              <li>To improve our site</li>
+              <li>To send periodic emails</li>
               <li>To send you service updates or promotional messages</li>
               <li>To respond to inquiries or support requests</li>
             </ul>
@@ -517,12 +518,7 @@ function Policy() {
               If you have questions or comments about this Privacy Policy, you
               may contact us at{" "}
               <span className="p-1">
-                <Link
-                  href="mailto:support@zedu.chat"
-                  target="_blank"
-                  rel=""
-                  className="text-blue-500"
-                >
+                <Link href="mailto:support@zedu.chat" className="text-blue-500">
                   support@zedu.chat
                 </Link>
               </span>
