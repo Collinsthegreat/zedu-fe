@@ -11,7 +11,7 @@ const Page = () => {
 
   if (!notification) {
     return (
-      <div className="flex h-[calc(100dvh-70px)] items-center justify-center bg-white">
+      <div className="flex h-[calc(100dvh-70px)] items-center justify-center bg-white dark:bg-[#1A1D21]">
         <div className="flex flex-col items-center justify-center">
           <Image
             src="/image/empty-message.svg"
@@ -21,7 +21,7 @@ const Page = () => {
             alt=""
             unoptimized
           />
-          <h2 className="text-xl font-bold text-blue-500">
+          <h2 className="text-xl font-bold text-blue-500 dark:text-zinc-200">
             Select a notification
           </h2>
         </div>

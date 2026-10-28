@@ -154,7 +154,7 @@ const People = () => {
               alt=""
               unoptimized
             />
-            <h2 className="font-bold text-xl text-blue-500">
+            <h2 className="font-bold text-xl text-blue-500 dark:text-zinc-200">
               Select a channel
             </h2>
           </div>

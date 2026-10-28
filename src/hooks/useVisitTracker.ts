@@ -32,8 +32,15 @@ export const useVisitTracker = () => {
     const trackVisit = async () => {
       try {
         const visitorId = getVisitorId();
-        const userData = localStorage.getItem("user");
-        const user = userData ? JSON.parse(userData) : null;
+        let user = null;
+        try {
+          const userData = localStorage.getItem("user");
+          if (userData) {
+            user = JSON.parse(userData);
+          }
+        } catch {
+          user = null;
+        }
         const username = user?.username || user?.email || `guest_${visitorId}`;
         const now = Date.now();
         const lastVisit = getLastVisit();

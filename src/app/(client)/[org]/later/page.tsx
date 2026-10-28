@@ -12,7 +12,7 @@ const Later = () => {
         alt=""
         unoptimized
       />
-      <h2 className="font-bold text-lg md:text-xl lg:text-2xl text-blue-500">
+      <h2 className="font-bold text-lg md:text-xl lg:text-2xl text-blue-500 dark:text-zinc-200">
         Saved Later Messages
       </h2>
     </div>

@@ -10,8 +10,10 @@ const Settings = () => {
   router.push(`/${state.orgSlug}/settings/personal/account`);
   return (
     <div className="h-[80vh] flex flex-col items-center justify-center">
-      <SettingsIcon className="size-40 text-blue-500 mb-4" />
-      <h2 className="font-bold text-2xl text-blue-500">Settings</h2>
+      <SettingsIcon className="size-40 text-blue-500 dark:text-zinc-200 mb-4" />
+      <h2 className="font-bold text-2xl text-blue-500 dark:text-zinc-200">
+        Settings
+      </h2>
     </div>
   );
 };
