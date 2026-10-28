@@ -66,8 +66,8 @@ const PricingPage = () => {
         id="compare-plans"
         className="mx-auto w-full max-w-7xl scroll-mt-24 px-4 sm:px-8 lg:px-12 space-y-6 relative"
       >
-        <div className="no-scrollbar">
-          <Table className="min-w-[680px] table-fixed sm:min-w-[760px] no-scrollbar">
+        <div className="w-full overflow-x-auto overflow-y-hidden [-webkit-overflow-scrolling:touch] scroll-smooth snap-x snap-mandatory">
+          <Table className="min-w-[680px] table-fixed sm:min-w-[760px]">
             <colgroup>
               <col className="w-[40%]" />
               {pricingComparisonPlans.map((plan) => (
@@ -79,14 +79,14 @@ const PricingPage = () => {
             </colgroup>
 
             <TableHeader>
-              <TableRow className="border-b border-neutral-200 hover:bg-transparent no-scrollbar">
-                <TableHead className="border-r border-neutral-200 px-4 py-3 text-left text-sm font-semibold text-neutral-700">
+              <TableRow className="border-b border-neutral-200 hover:bg-transparent">
+                <TableHead className="sticky left-0 z-10 border-r border-neutral-200 bg-white px-4 py-3 text-left text-sm font-semibold text-neutral-700 snap-start">
                   Plan Features
                 </TableHead>
                 {pricingComparisonPlans.map((plan) => (
                   <TableHead
                     key={plan.key}
-                    className="border-r border-neutral-200 px-4 py-3 text-center text-sm font-semibold text-neutral-900 last:border-r-0"
+                    className="border-r border-neutral-200 px-4 py-3 text-center text-sm font-semibold text-neutral-900 last:border-r-0 snap-start"
                   >
                     {plan.label}
                   </TableHead>

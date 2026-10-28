@@ -86,78 +86,81 @@ export const PricingComparisonTable = ({
         </div>
       ) : null}
 
-      <Table className="min-w-[680px] table-fixed sm:min-w-[760px]">
-        <colgroup>
-          <col className="w-[40%]" />
-          {plans.map((plan) => (
-            <col key={plan.key} style={{ width: `${60 / plans.length}%` }} />
-          ))}
-        </colgroup>
+      <div className="w-full overflow-x-auto overflow-y-hidden [-webkit-overflow-scrolling:touch] scroll-smooth snap-x snap-mandatory">
+        <Table className="min-w-[680px] table-fixed sm:min-w-[760px]">
+          <colgroup>
+            <col className="w-[40%]" />
+            {plans.map((plan) => (
+              <col key={plan.key} style={{ width: `${60 / plans.length}%` }} />
+            ))}
+          </colgroup>
 
-        <TableHeader>
-          <TableRow className="border-b border-neutral-200 hover:bg-transparent">
-            <TableHead
-              colSpan={plans.length + 1}
-              className="pb-2 pt-5 text-sm font-semibold text-neutral-900"
-            >
-              <span className="flex items-center gap-2">
-                {section.titleIcon ? (
-                  <span className="inline-flex">
-                    {renderSectionIcon(section.titleIcon)}
-                  </span>
-                ) : sectionTitleIcon ? (
-                  <span className="inline-flex">{sectionTitleIcon}</span>
-                ) : null}
-                {section.title}
-              </span>
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-
-        <TableBody>
-          {section.rows.map((row, rowIndex) => {
-            const isLastRow = rowIndex === section.rows.length - 1;
-
-            return (
-              <TableRow
-                key={row.key}
-                className={cn(
-                  "border-0 hover:bg-white",
-                  rowIndex % 2 === 1 && "bg-neutral-100 hover:bg-neutral-100"
-                )}
+          <TableHeader>
+            <TableRow className="border-b border-neutral-200 hover:bg-transparent">
+              <TableHead
+                colSpan={plans.length + 1}
+                className="sticky left-0 z-10 bg-white pb-2 pt-5 text-sm font-semibold text-neutral-900 snap-start"
               >
-                <TableCell
+                <span className="flex items-center gap-2">
+                  {section.titleIcon ? (
+                    <span className="inline-flex">
+                      {renderSectionIcon(section.titleIcon)}
+                    </span>
+                  ) : sectionTitleIcon ? (
+                    <span className="inline-flex">{sectionTitleIcon}</span>
+                  ) : null}
+                  {section.title}
+                </span>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+
+          <TableBody>
+            {section.rows.map((row, rowIndex) => {
+              const isLastRow = rowIndex === section.rows.length - 1;
+
+              return (
+                <TableRow
+                  key={row.key}
                   className={cn(
-                    "border-r border-neutral-200 px-4 py-3 text-sm text-neutral-700",
-                    isLastRow && "!border-b !border-neutral-200"
+                    "border-0 hover:bg-white",
+                    rowIndex % 2 === 1 && "bg-neutral-100 hover:bg-neutral-100"
                   )}
                 >
-                  <span className="flex w-full items-center justify-between gap-3">
-                    <span>{row.label}</span>
-                    {row.showInfoIcon && rowInfoIcon ? (
-                      <span className="inline-flex shrink-0">
-                        {rowInfoIcon}
-                      </span>
-                    ) : null}
-                  </span>
-                </TableCell>
-
-                {plans.map((plan) => (
                   <TableCell
-                    key={`${row.key}-${plan.key}`}
                     className={cn(
-                      "border-r border-neutral-200 px-4 py-3 text-center last:border-r-0",
+                      "sticky left-0 z-[1] border-r border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-700 snap-start",
+                      rowIndex % 2 === 1 && "bg-neutral-100",
                       isLastRow && "!border-b !border-neutral-200"
                     )}
                   >
-                    {renderCellValue(row.values[plan.key])}
+                    <span className="flex w-full items-center justify-between gap-3">
+                      <span>{row.label}</span>
+                      {row.showInfoIcon && rowInfoIcon ? (
+                        <span className="inline-flex shrink-0">
+                          {rowInfoIcon}
+                        </span>
+                      ) : null}
+                    </span>
                   </TableCell>
-                ))}
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+
+                  {plans.map((plan) => (
+                    <TableCell
+                      key={`${row.key}-${plan.key}`}
+                      className={cn(
+                        "border-r border-neutral-200 px-4 py-3 text-center last:border-r-0",
+                        isLastRow && "!border-b !border-neutral-200"
+                      )}
+                    >
+                      {renderCellValue(row.values[plan.key])}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };
