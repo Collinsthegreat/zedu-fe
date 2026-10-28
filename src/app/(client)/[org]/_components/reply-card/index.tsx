@@ -27,6 +27,11 @@ type ReplySummaryProps = {
   handleReply: any;
 };
 
+/**
+ * ReplyCard displays a summary of replies on a thread, including participant
+ * avatars and a label showing the total number of replies. The label uses
+ * singular "reply" when totalReplies === 1 and plural "replies" otherwise.
+ */
 export default function ReplyCard({
   users,
   totalReplies,
@@ -93,7 +98,7 @@ export default function ReplyCard({
       {visibleUsers?.length > 0 && (
         <>
           <span className="text-blue-600 hover:underline cursor-pointer ml-2">
-            {totalReplies} replies
+            {totalReplies} {totalReplies === 1 ? "reply" : "replies"}
           </span>
           <span className="text-gray-500 ml-1">
             Last reply {timeformat(lastReplyTime)}
